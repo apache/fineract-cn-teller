@@ -1,0 +1,6 @@
+rootProject.name = 'teller'
+
+includeBuild 'api'
+includeBuild 'service'
+includeBuild 'component-test'
+
