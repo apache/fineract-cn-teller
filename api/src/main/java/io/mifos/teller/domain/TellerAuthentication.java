@@ -3,7 +3,7 @@ package io.mifos.teller.domain;
 public class TellerAuthentication {
 
   private String employeeIdentifier;
-  private String password;
+  private byte[] password;
 
   public TellerAuthentication() {
     super();
@@ -17,11 +17,11 @@ public class TellerAuthentication {
     this.employeeIdentifier = employeeIdentifier;
   }
 
-  public String getPassword() {
+  public byte[] getPassword() {
     return this.password;
   }
 
-  public void setPassword(final String password) {
+  public void setPassword(final byte[] password) {
     this.password = password;
   }
 }

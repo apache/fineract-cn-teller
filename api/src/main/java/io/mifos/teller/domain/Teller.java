@@ -26,7 +26,7 @@ public class Teller {
   private String tellerAccountIdentifier;
   @ValidIdentifier
   private String vaultAccountIdentifier;
-  private String status;
+  private Status status;
   private String createdBy;
   private String createdOn;
   private String lastModifiedBy;
@@ -77,11 +77,11 @@ public class Teller {
   }
 
   public String getStatus() {
-    return this.status;
+    return this.status.name();
   }
 
   public void setStatus(final String status) {
-    this.status = status;
+    this.status = Status.valueOf(status);
   }
 
   public String getCreatedBy() {

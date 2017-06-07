@@ -1,5 +1,9 @@
 package io.mifos.teller.domain;
 
+import io.mifos.core.lang.validation.constraints.ValidIdentifier;
+
+import javax.validation.constraints.NotNull;
+
 public class TellerManagementCommand {
 
   public enum Action {
@@ -12,9 +16,11 @@ public class TellerManagementCommand {
     CREDIT
   }
 
+  @NotNull
   private Action action;
   private Adjustment adjustment;
   private Double amount;
+  @ValidIdentifier(optional = true)
   private String assignedEmployeeIdentifier;
 
   public TellerManagementCommand() {

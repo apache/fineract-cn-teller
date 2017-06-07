@@ -25,7 +25,7 @@ import java.util.List;
 public interface TellerManager {
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}",
+      value = "/offices/{officeIdentifier}",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -38,7 +38,7 @@ public interface TellerManager {
   void create(@PathVariable("officeIdentifier") final String officeIdentifier, @RequestBody @Valid final Teller teller);
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}/teller/{tellerCode}",
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}",
       method = RequestMethod.GET,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.ALL_VALUE
@@ -50,7 +50,7 @@ public interface TellerManager {
               @PathVariable("tellerCode") final String tellerCode);
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}/teller",
+      value = "/offices/{officeIdentifier}/teller",
       method = RequestMethod.GET,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.ALL_VALUE
@@ -61,7 +61,7 @@ public interface TellerManager {
   List<Teller> fetch(@PathVariable("officeIdentifier") final String officeIdentifier);
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}/teller/{tellerCode}",
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}",
       method = RequestMethod.PUT,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -75,7 +75,7 @@ public interface TellerManager {
               @RequestBody @Valid final Teller teller);
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}/teller/{tellerCode}/commands",
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}/commands",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -89,7 +89,7 @@ public interface TellerManager {
             @RequestBody @Valid final TellerManagementCommand tellerManagementCommand);
 
   @RequestMapping(
-      value = "/management/{officeIdentifier}/teller/{tellerCode}/balance",
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}/balance",
       method = RequestMethod.GET,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.ALL_VALUE
@@ -101,7 +101,7 @@ public interface TellerManager {
                                 @PathVariable("tellerCode") final String tellerCode);
 
   @RequestMapping(
-      value = "/operations/{tellerCode}/auth",
+      value = "/teller/{tellerCode}/auth",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -114,7 +114,7 @@ public interface TellerManager {
             @RequestBody @Valid final TellerAuthentication tellerAuthentication);
 
   @RequestMapping(
-      value = "/operations/{tellerCode}",
+      value = "/teller/{tellerCode}",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -126,7 +126,7 @@ public interface TellerManager {
             @RequestParam(value = "command", required = true) final String command);
 
   @RequestMapping(
-      value = "/operations/{tellerCode}/transactions",
+      value = "/teller/{tellerCode}/transactions",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -139,7 +139,7 @@ public interface TellerManager {
                               @RequestBody @Valid final TellerTransaction tellerTransaction);
 
   @RequestMapping(
-      value = "/operations/{tellerCode}/transactions/{identifier}",
+      value = "/teller/{tellerCode}/transactions/{identifier}",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -150,4 +150,16 @@ public interface TellerManager {
   void confirm(@PathVariable("tellerCode") final String tellerCode,
                @PathVariable("identifier") final String tellerTransactionIdentifier,
                @RequestParam(value = "command", required = true) final String command);
+
+  @RequestMapping(
+      value = "/teller/{tellerCode}/transactions",
+      method = RequestMethod.GET,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.ALL_VALUE
+  )
+  @ThrowsExceptions({
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class)
+  })
+  List<TellerTransaction> fetch(@PathVariable("tellerCode") final String tellerCode,
+                                @RequestParam(value = "status", required = false) final String status);
 }

@@ -2,6 +2,9 @@ package io.mifos.teller.domain;
 
 import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+
 public class TellerTransaction {
 
   public enum State {
@@ -12,11 +15,18 @@ public class TellerTransaction {
 
   @ValidIdentifier(optional = true)
   private String identifier;
+  @NotNull
   private String transactionType;
+  @NotNull
   private String transactionDate;
+  @ValidIdentifier
   private String productIdentifier;
-  private String accountIdentifier;
+  @ValidIdentifier
+  private String customerAccountIdentifier;
+  @ValidIdentifier
   private String clerk;
+  @NotNull
+  @DecimalMin("0.00")
   private Double amount;
   private State state;
 
@@ -56,12 +66,12 @@ public class TellerTransaction {
     this.productIdentifier = productIdentifier;
   }
 
-  public String getAccountIdentifier() {
-    return this.accountIdentifier;
+  public String getCustomerAccountIdentifier() {
+    return this.customerAccountIdentifier;
   }
 
-  public void setAccountIdentifier(final String accountIdentifier) {
-    this.accountIdentifier = accountIdentifier;
+  public void setCustomerAccountIdentifier(final String customerAccountIdentifier) {
+    this.customerAccountIdentifier = customerAccountIdentifier;
   }
 
   public String getClerk() {
