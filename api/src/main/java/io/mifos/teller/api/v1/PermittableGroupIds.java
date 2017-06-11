@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.api.v1;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+@SuppressWarnings("unused")
+public interface PermittableGroupIds {
+  String TELLER_MANAGEMENT = "teller__v1__management";
+  String TELLER_OPERATION = "teller__v1__operation";
 }

@@ -13,10 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.api.v1.domain;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+public class Charge {
+
+  private String code;
+  private String name;
+  private Double amount;
+
+  public Charge() {
+    super();
+  }
+
+  public String getCode() {
+    return this.code;
+  }
+
+  public void setCode(final String code) {
+    this.code = code;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(final String name) {
+    this.name = name;
+  }
+
+  public Double getAmount() {
+    return this.amount;
+  }
+
+  public void setAmount(final Double amount) {
+    this.amount = amount;
+  }
 }

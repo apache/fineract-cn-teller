@@ -9,7 +9,12 @@ ext.versions = [
         frameworkmariadb : '0.1.0-BUILD-SNAPSHOT',
         frameworkcommand : '0.1.0-BUILD-SNAPSHOT',
         frameworktest: '0.1.0-BUILD-SNAPSHOT',
+        frameworkcrypto: '0.1.0-BUILD-SNAPSHOT',
         frameworkanubis: '0.1.0-BUILD-SNAPSHOT',
+        frameworkoffice: '0.1.0-BUILD-SNAPSHOT',
+        frameworkaccounting: '0.1.0-BUILD-SNAPSHOT',
+        frameworkdeposit: '0.1.0-BUILD-SNAPSHOT',
+        frameworkportfolio: '0.1.0-BUILD-SNAPSHOT',
         validator : '5.3.0.Final'
 ]
 

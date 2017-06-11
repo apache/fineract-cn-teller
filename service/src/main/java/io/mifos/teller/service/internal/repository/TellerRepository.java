@@ -13,10 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.service.internal.repository;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface TellerRepository extends JpaRepository<TellerEntity, Long> {
+
+  Optional<TellerEntity> findByIdentifier(final String identifier);
+
+  List<TellerEntity> findByOfficeIdentifier(final String officeIdentifier);
 }

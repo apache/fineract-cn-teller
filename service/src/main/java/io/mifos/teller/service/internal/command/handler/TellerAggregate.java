@@ -1,0 +1,278 @@
+/*
+ * Copyright 2017 The Mifos Initiative.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.mifos.teller.service.internal.command.handler;
+
+import com.google.common.collect.Sets;
+import io.mifos.accounting.api.v1.domain.Creditor;
+import io.mifos.accounting.api.v1.domain.Debtor;
+import io.mifos.accounting.api.v1.domain.JournalEntry;
+import io.mifos.core.api.util.UserContextHolder;
+import io.mifos.core.command.annotation.Aggregate;
+import io.mifos.core.command.annotation.CommandHandler;
+import io.mifos.core.command.annotation.EventEmitter;
+import io.mifos.core.lang.DateConverter;
+import io.mifos.teller.ServiceConstants;
+import io.mifos.teller.api.v1.EventConstants;
+import io.mifos.teller.api.v1.domain.Teller;
+import io.mifos.teller.api.v1.domain.TellerManagementCommand;
+import io.mifos.teller.service.internal.command.ChangeTellerCommand;
+import io.mifos.teller.service.internal.command.CloseTellerCommand;
+import io.mifos.teller.service.internal.command.CreateTellerCommand;
+import io.mifos.teller.service.internal.command.OpenTellerCommand;
+import io.mifos.teller.service.internal.mapper.TellerMapper;
+import io.mifos.teller.service.internal.repository.TellerEntity;
+import io.mifos.teller.service.internal.repository.TellerRepository;
+import io.mifos.teller.service.internal.service.helper.AccountingService;
+import io.mifos.teller.service.internal.service.helper.OrganizationService;
+import io.mifos.tool.crypto.HashGenerator;
+import io.mifos.tool.crypto.SaltGenerator;
+import org.apache.commons.lang.RandomStringUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Aggregate
+public class TellerAggregate {
+
+  private final Logger logger;
+  private final TellerRepository tellerRepository;
+  private final OrganizationService organizationService;
+  private final AccountingService accountingService;
+  private final HashGenerator hashGenerator;
+  private final SaltGenerator saltGenerator;
+
+  @Autowired
+  public TellerAggregate(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
+                         final TellerRepository tellerRepository,
+                         final OrganizationService organizationService,
+                         final AccountingService accountingService,
+                         final HashGenerator hashGenerator,
+                         final SaltGenerator saltGenerator) {
+    super();
+    this.logger = logger;
+    this.tellerRepository = tellerRepository;
+    this.organizationService = organizationService;
+    this.accountingService = accountingService;
+    this.hashGenerator = hashGenerator;
+    this.saltGenerator = saltGenerator;
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.POST_TELLER)
+  public String process(final CreateTellerCommand createTellerCommand) {
+    final String officeIdentifier = createTellerCommand.officeIdentifier();
+    final Teller teller = createTellerCommand.teller();
+
+    if (this.checkPreconditions(officeIdentifier, teller)) {
+
+      final TellerEntity tellerEntity = TellerMapper.map(officeIdentifier, teller);
+
+      this.encryptPassword(teller, tellerEntity);
+
+      tellerEntity.setState(Teller.State.CLOSED.name());
+      tellerEntity.setCreatedBy(UserContextHolder.checkedGetUser());
+      tellerEntity.setCreatedOn(LocalDateTime.now(Clock.systemUTC()));
+
+      this.tellerRepository.save(tellerEntity);
+
+      return teller.getCode();
+    } else {
+      throw new IllegalStateException("Preconditions not met, see log file for further information.");
+    }
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.PUT_TELLER)
+  public String process(final ChangeTellerCommand changeTellerCommand) {
+    final String officeIdentifier = changeTellerCommand.officeIdentifier();
+    final Teller teller = changeTellerCommand.teller();
+
+    if (this.checkPreconditions(officeIdentifier, teller)) {
+      final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(teller.getCode());
+      if (optionalTellerEntity.isPresent()) {
+        final TellerEntity tellerEntity = optionalTellerEntity.get();
+
+        this.encryptPassword(teller, tellerEntity);
+
+        tellerEntity.setTellerAccountIdentifier(teller.getTellerAccountIdentifier());
+        tellerEntity.setVaultAccountIdentifier(teller.getVaultAccountIdentifier());
+        tellerEntity.setCashdrawLimit(teller.getCashdrawLimit());
+        tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
+        tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+
+        this.tellerRepository.save(tellerEntity);
+
+        return teller.getCode();
+      } else {
+        throw new IllegalStateException("Teller " + teller.getCode() + " not found.");
+      }
+    } else {
+      throw new IllegalStateException("Preconditions not met, see log file for further information.");
+    }
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.OPEN_TELLER)
+  public String process(final OpenTellerCommand openTellerCommand) {
+    final String tellerCode = openTellerCommand.tellerCode();
+    final TellerManagementCommand tellerManagementCommand = openTellerCommand.tellerManagementCommand();
+
+    final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTellerEntity.isPresent()) {
+      final TellerEntity tellerEntity = optionalTellerEntity.get();
+
+      if (this.checkPreconditions(tellerEntity.getOfficeIdentifier(), TellerMapper.map(tellerEntity))) {
+
+        if (tellerManagementCommand.getAmount() != null && tellerManagementCommand.getAmount() > 0.00D) {
+          this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
+        }
+
+        tellerEntity.setAssignedEmployeeIdentifier(tellerManagementCommand.getAssignedEmployeeIdentifier());
+        tellerEntity.setState(Teller.State.OPEN.name());
+        tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
+        tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+
+        this.tellerRepository.save(tellerEntity);
+        return tellerCode;
+      } else {
+        throw new IllegalStateException("Preconditions not met, see log file for further information.");
+      }
+    } else {
+      throw new IllegalStateException("Teller " + tellerCode + " not found.");
+    }
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.CLOSE_TELLER)
+  public String process(final CloseTellerCommand closeTellerCommand) {
+    final String tellerCode = closeTellerCommand.tellerCode();
+    final TellerManagementCommand tellerManagementCommand = closeTellerCommand.tellerManagementCommand();
+
+    final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTellerEntity.isPresent()) {
+      final TellerEntity tellerEntity = optionalTellerEntity.get();
+
+      if (this.checkPreconditions(tellerEntity.getOfficeIdentifier(), TellerMapper.map(tellerEntity))) {
+
+        if (tellerManagementCommand.getAmount() != null && tellerManagementCommand.getAmount() > 0.00D) {
+          this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
+        }
+        tellerEntity.setAssignedEmployeeIdentifier(null);
+        tellerEntity.setState(Teller.State.CLOSED.name());
+        tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
+        tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+
+        this.tellerRepository.save(tellerEntity);
+        return tellerCode;
+      } else {
+        throw new IllegalStateException("Preconditions not met, see log file for further information.");
+      }
+    } else {
+      throw new IllegalStateException("Teller " + tellerCode + " not found.");
+    }
+  }
+
+  private boolean checkPreconditions(final String officeIdentifier, final Teller teller) {
+    boolean pass = true;
+
+    if (!this.organizationService.officeExists(officeIdentifier)) {
+      this.logger.warn("Office {} not found.", officeIdentifier);
+      pass = false;
+    }
+
+    if (!this.accountingService.accountExists(teller.getTellerAccountIdentifier())) {
+      this.logger.warn("Teller account {} not found.", teller.getTellerAccountIdentifier());
+      pass = false;
+    }
+
+    if (!this.accountingService.accountExists(teller.getVaultAccountIdentifier())) {
+      this.logger.warn("Vault account {} not found.", teller.getVaultAccountIdentifier());
+      pass = false;
+    }
+
+    return pass;
+  }
+
+  private void encryptPassword(final Teller teller, final TellerEntity tellerEntity) {
+    final byte[] salt = this.saltGenerator.createRandomSalt();
+    final byte[] newPassword = this.hashGenerator.hash(teller.getPassword(), salt, ServiceConstants.ITERATION_COUNT,
+        ServiceConstants.LENGTH);
+    tellerEntity.setSalt(Base64Utils.encodeToString(salt));
+    tellerEntity.setPassword(Base64Utils.encodeToString(newPassword));
+  }
+
+  private JournalEntry createJournalEntry(final TellerEntity tellerEntity, final TellerManagementCommand tellerManagementCommand) {
+
+    if (tellerManagementCommand.getAmount() > tellerEntity.getCashdrawLimit()) {
+      this.logger.warn("Adjustment {} exceeds cashdraw limit {}.", tellerManagementCommand.getAmount(),
+          tellerEntity.getCashdrawLimit());
+      throw new IllegalArgumentException("Adjustment exceeds cashdraw limit.");
+    }
+
+    final JournalEntry journalEntry = new JournalEntry();
+    journalEntry.setTransactionIdentifier(RandomStringUtils.randomNumeric(32));
+    journalEntry.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    journalEntry.setClerk(UserContextHolder.checkedGetUser());
+    journalEntry.setMessage("Teller adjustment.");
+
+    final TellerManagementCommand.Adjustment adjustment =
+        TellerManagementCommand.Adjustment.valueOf(tellerManagementCommand.getAdjustment());
+
+    final Debtor debtor = new Debtor();
+    final Creditor creditor = new Creditor();
+    switch (adjustment) {
+      case DEBIT:
+        journalEntry.setTransactionType("DAJT");
+
+        debtor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
+        debtor.setAmount(tellerManagementCommand.getAmount().toString());
+        journalEntry.setDebtors(Sets.newHashSet(debtor));
+
+        creditor.setAccountNumber(tellerEntity.getVaultAccountIdentifier());
+        creditor.setAmount(tellerManagementCommand.getAmount().toString());
+        journalEntry.setCreditors(Sets.newHashSet(creditor));
+
+        break;
+      case CREDIT:
+        journalEntry.setTransactionType("CAJT");
+
+        debtor.setAccountNumber(tellerEntity.getVaultAccountIdentifier());
+        debtor.setAmount(tellerManagementCommand.getAmount().toString());
+        journalEntry.setDebtors(Sets.newHashSet(debtor));
+
+        creditor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
+        creditor.setAmount(tellerManagementCommand.getAmount().toString());
+        journalEntry.setCreditors(Sets.newHashSet(creditor));
+
+        break;
+      default:
+        this.logger.warn("Unsupported adjustment type {}.", tellerManagementCommand.getAdjustment());
+    }
+
+    return journalEntry;
+  }
+}
+

@@ -13,10 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.service.internal.command;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+import io.mifos.teller.api.v1.domain.Teller;
+
+public class CreateTellerCommand {
+
+  private final String officeIdentifier;
+  private final Teller teller;
+
+  public CreateTellerCommand(final String officeIdentifier, final Teller teller) {
+    super();
+    this.officeIdentifier = officeIdentifier;
+    this.teller = teller;
+  }
+
+  public String officeIdentifier() {
+    return this.officeIdentifier;
+  }
+
+  public Teller teller() {
+    return this.teller;
+  }
 }

@@ -13,10 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.api.v1.domain;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+public class TellerAuthentication {
+
+  private String employeeIdentifier;
+  private byte[] password;
+
+  public TellerAuthentication() {
+    super();
+  }
+
+  public String getEmployeeIdentifier() {
+    return this.employeeIdentifier;
+  }
+
+  public void setEmployeeIdentifier(final String employeeIdentifier) {
+    this.employeeIdentifier = employeeIdentifier;
+  }
+
+  public byte[] getPassword() {
+    return this.password;
+  }
+
+  public void setPassword(final byte[] password) {
+    this.password = password;
+  }
 }

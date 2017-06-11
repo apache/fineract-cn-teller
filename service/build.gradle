@@ -31,6 +31,10 @@ dependencies {
             [group: 'org.springframework.cloud', name: 'spring-cloud-starter-eureka'],
             [group: 'org.springframework.boot', name: 'spring-boot-starter-jetty'],
             [group: 'io.mifos.teller', name: 'api', version: project.version],
+            [group: 'io.mifos.office', name: 'api', version: versions.frameworkoffice],
+            [group: 'io.mifos.accounting', name: 'api', version: versions.frameworkaccounting],
+            [group: 'io.mifos.deposit-account-management', name: 'api', version: versions.frameworkdeposit],
+            [group: 'io.mifos.portfolio', name: 'api', version: versions.frameworkportfolio],
             [group: 'io.mifos.anubis', name: 'library', version: versions.frameworkanubis],
             [group: 'com.google.code.gson', name: 'gson'],
             [group: 'io.mifos.core', name: 'lang', version: versions.frameworklang],
@@ -38,6 +42,7 @@ dependencies {
             [group: 'io.mifos.core', name: 'cassandra', version: versions.frameworkcassandra],
             [group: 'io.mifos.core', name: 'mariadb', version: versions.frameworkmariadb],
             [group: 'io.mifos.core', name: 'command', version: versions.frameworkcommand],
+            [group: 'io.mifos.tools', name: 'crypto', version: versions.frameworkcrypto],
             [group: 'org.hibernate', name: 'hibernate-validator', version: versions.validator]
     )
 }

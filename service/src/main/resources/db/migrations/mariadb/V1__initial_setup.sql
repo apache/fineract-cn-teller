@@ -14,9 +14,21 @@
 -- limitations under the License.
 --
 
-CREATE TABLE template_samples (
+CREATE TABLE tajet_teller (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  identifier VARCHAR(8) NOT NULL,
-  payload VARCHAR(512) NULL,
-  CONSTRAINT template_samples_pk PRIMARY KEY (id)
+  identifier                   VARCHAR(32)     NOT NULL,
+  a_password                   VARCHAR(4096)  NOT NULL,
+  a_salt                       VARCHAR(4069)  NOT NULL,
+  office_identifier            VARCHAR(32)    NOT NULL,
+  cashdraw_limit               NUMERIC(15, 5) NOT NULL,
+  teller_account_identifier    VARCHAR(32)    NOT NULL,
+  vault_account_identifier     VARCHAR(32)    NOT NULL,
+  assigned_employee_identifier VARCHAR(32)    NULL,
+  a_state                      VARCHAR(256)   NOT NULL,
+  created_on                   TIMESTAMP(3)   NOT NULL,
+  created_by                   VARCHAR(32)    NOT NULL,
+  last_modified_on             TIMESTAMP(3)   NULL,
+  last_modified_by             VARCHAR(32)    NULL,
+  CONSTRAINT tajet_teller_pk PRIMARY KEY (id),
+  CONSTRAINT tajet_teller_identifier_uq UNIQUE (identifier)
 );
