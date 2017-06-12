@@ -27,12 +27,14 @@ public class TellerManagementCommand {
   }
 
   public enum Adjustment {
+    NONE,
     DEBIT,
     CREDIT
   }
 
   @NotNull
   private Action action;
+  @NotNull
   private Adjustment adjustment;
   private Double amount;
   @ValidIdentifier(optional = true)
