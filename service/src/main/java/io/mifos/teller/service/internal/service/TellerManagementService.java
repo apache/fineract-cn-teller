@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -73,7 +74,8 @@ public class TellerManagementService {
     optionalTellerEntity.ifPresent(tellerEntity -> {
 
       final String accountIdentifier = tellerEntity.getTellerAccountIdentifier();
-      final LocalDateTime lastModifiedOn = tellerEntity.getLastModifiedOn();
+      final LocalDateTime lastModifiedOn =
+          tellerEntity.getLastModifiedOn() != null ? tellerEntity.getLastModifiedOn() : LocalDateTime.now(Clock.systemUTC());
       final LocalDateTime startDate = lastModifiedOn.withHour(0).withMinute(0).withSecond(0).withNano(0);
       final LocalDateTime endDate = lastModifiedOn.withHour(23).withMinute(59).withSecond(59).withNano(999);
       final String dateRange =
