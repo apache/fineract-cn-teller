@@ -81,10 +81,10 @@ public class DepositAccountManagementService {
   }
 
   public void activateProductInstance(final String customerAccountIdentifier) {
-    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.ACTIVATE_PRODUCT_INSTANCE);
+    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.ACTIVATE_PRODUCT_INSTANCE_COMMAND);
   }
 
   public void closeProductInstance(final String customerAccountIdentifier) {
-    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.CLOSE_PRODUCT_INSTANCE);
+    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.CLOSE_PRODUCT_INSTANCE_COMMAND);
   }
 }
