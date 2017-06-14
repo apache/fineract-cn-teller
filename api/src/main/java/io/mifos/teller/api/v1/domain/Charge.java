@@ -18,6 +18,7 @@ package io.mifos.teller.api.v1.domain;
 public class Charge {
 
   private String code;
+  private String incomeAccountIdentifier;
   private String name;
   private Double amount;
 
@@ -31,6 +32,14 @@ public class Charge {
 
   public void setCode(final String code) {
     this.code = code;
+  }
+
+  public String getIncomeAccountIdentifier() {
+    return this.incomeAccountIdentifier;
+  }
+
+  public void setIncomeAccountIdentifier(final String incomeAccountIdentifier) {
+    this.incomeAccountIdentifier = incomeAccountIdentifier;
   }
 
   public String getName() {

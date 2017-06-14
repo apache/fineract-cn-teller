@@ -361,6 +361,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     final TellerManagementCommand command = new TellerManagementCommand();
     command.setAction(TellerManagementCommand.Action.OPEN.name());
+    command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
     command.setAssignedEmployeeIdentifier(RandomStringUtils.randomAlphanumeric(32));
 
     Mockito.doAnswer(invocation -> true)
@@ -395,6 +396,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     final TellerManagementCommand command = new TellerManagementCommand();
     command.setAction(TellerManagementCommand.Action.OPEN.name());
+    command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
     command.setAssignedEmployeeIdentifier(RandomStringUtils.randomAlphanumeric(32));
 
     Mockito.doAnswer(invocation -> true)
@@ -435,6 +437,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     final TellerManagementCommand command = new TellerManagementCommand();
     command.setAction(TellerManagementCommand.Action.CLOSE.name());
+    command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
 
     super.testSubject.post(officeIdentifier, teller.getCode(), command);
   }
@@ -459,6 +462,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     final TellerManagementCommand command = new TellerManagementCommand();
     command.setAction(TellerManagementCommand.Action.OPEN.name());
+    command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
     command.setAssignedEmployeeIdentifier(RandomStringUtils.randomAlphanumeric(32));
 
     Mockito.doAnswer(invocation -> true)

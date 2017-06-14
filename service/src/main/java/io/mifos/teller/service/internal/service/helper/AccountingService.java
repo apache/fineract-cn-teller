@@ -17,6 +17,7 @@ package io.mifos.teller.service.internal.service.helper;
 
 import io.mifos.accounting.api.v1.client.AccountNotFoundException;
 import io.mifos.accounting.api.v1.client.LedgerManager;
+import io.mifos.accounting.api.v1.domain.AccountCommand;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
 import io.mifos.accounting.api.v1.domain.JournalEntry;
 import io.mifos.teller.ServiceConstants;
@@ -58,5 +59,19 @@ public class AccountingService {
 
   public void postJournalEntry(final JournalEntry journalEntry) {
     this.ledgerManager.createJournalEntry(journalEntry);
+  }
+
+  public void closeAccount(final String accountIdentifier) {
+    final AccountCommand accountCommand = new AccountCommand();
+    accountCommand.setAction(AccountCommand.Action.CLOSE.name());
+    accountCommand.setComment(ServiceConstants.TX_CLOSE_ACCOUNT);
+    this.ledgerManager.accountCommand(accountIdentifier, accountCommand);
+  }
+
+  public void openAccount(final String accountIdentifier) {
+    final AccountCommand accountCommand = new AccountCommand();
+    accountCommand.setAction(AccountCommand.Action.REOPEN.name());
+    accountCommand.setComment(ServiceConstants.TX_OPEN_ACCOUNT);
+    this.ledgerManager.accountCommand(accountIdentifier, accountCommand);
   }
 }

@@ -15,8 +15,8 @@
 --
 
 CREATE TABLE tajet_teller (
-  id BIGINT NOT NULL AUTO_INCREMENT,
-  identifier                   VARCHAR(32)     NOT NULL,
+  id                           BIGINT         NOT NULL AUTO_INCREMENT,
+  identifier                   VARCHAR(32)    NOT NULL,
   a_password                   VARCHAR(4096)  NOT NULL,
   a_salt                       VARCHAR(4069)  NOT NULL,
   office_identifier            VARCHAR(32)    NOT NULL,
@@ -31,4 +31,22 @@ CREATE TABLE tajet_teller (
   last_modified_by             VARCHAR(32)    NULL,
   CONSTRAINT tajet_teller_pk PRIMARY KEY (id),
   CONSTRAINT tajet_teller_identifier_uq UNIQUE (identifier)
+);
+
+CREATE TABLE tajet_teller_transactions (
+  id                          BIGINT         NOT NULL AUTO_INCREMENT,
+  teller_id                   BIGINT         NOT NULL,
+  identifier                  VARCHAR(32)    NOT NULL,
+  transaction_type            VARCHAR(32)    NOT NULL,
+  transaction_date            TIMESTAMP(3)   NOT NULL,
+  product_identifier          VARCHAR(32)    NOT NULL,
+  product_case_identifier     VARCHAR(32)    NULL,
+  customer_account_identifier VARCHAR(32)    NOT NULL,
+  target_account_identifier   VARCHAR(32)    NULL,
+  clerk                       VARCHAR(32)    NOT NULL,
+  amount                      NUMERIC(15, 5) NOT NULL,
+  a_state                     VARCHAR(256)   NOT NULL,
+  CONSTRAINT tajet_teller_transaction PRIMARY KEY (id),
+  CONSTRAINT tajet_teller_identifier_uq UNIQUE (identifier),
+  CONSTRAINT tajet_teller_transaction_fk FOREIGN KEY (teller_id) REFERENCES tajet_teller (id)
 );

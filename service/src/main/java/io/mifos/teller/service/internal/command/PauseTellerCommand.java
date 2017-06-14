@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.service.internal.command;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
+public class PauseTellerCommand {
+  private final String tellerCode;
 
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+  public PauseTellerCommand(final String tellerCode) {
+    super();
+    this.tellerCode = tellerCode;
+  }
 
-  String TX_OPEN_ACCOUNT = "ACCO";
-  String TX_CLOSE_ACCOUNT = "ACCC";
-  String TX_ACCOUNT_TRANSFER = "BACT";
-  String TX_CASH_DEPOSIT = "BCDP";
-  String TX_CASH_WITHDRAWAL = "BCWD";
-
-  String TX_DEPOSIT_ADJUSTMENT = "DAJT";
-  String TX_CREDIT_ADJUSTMENT = "CAJT";
-  String TX_CHARGES = "CHRG";
+  public String tellerCode() {
+    return this.tellerCode;
+  }
 }

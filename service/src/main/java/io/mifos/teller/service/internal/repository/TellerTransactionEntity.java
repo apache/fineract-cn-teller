@@ -13,46 +13,74 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller.api.v1.domain;
+package io.mifos.teller.service.internal.repository;
 
-import io.mifos.core.lang.validation.constraints.ValidIdentifier;
+import io.mifos.core.mariadb.util.LocalDateTimeConverter;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 
-public class TellerTransaction {
+@Entity
+@Table(name = "tajet_teller_transactions")
+public class TellerTransactionEntity {
 
-  public enum State {
-    PENDING,
-    CANCELED,
-    CONFIRMED
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", nullable = false)
+  private Long id;
+  @ManyToOne(optional = false, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @JoinColumn(name = "teller_id")
+  private TellerEntity teller;
+  @Column(name = "identifier", nullable = false, length = 32)
+  private String identifier;
+  @Column(name = "transaction_type", nullable = false, length = 32)
+  private String transactionType;
+  @Column(name = "transaction_date", nullable = false)
+  @Convert(converter = LocalDateTimeConverter.class)
+  private LocalDateTime transactionDate;
+  @Column(name = "product_identifier", nullable = false, length = 32)
+  private String productIdentifier;
+  @Column(name = "product_case_identifier", nullable = true, length = 32)
+  private String productCaseIdentifier;
+  @Column(name = "customer_account_identifier", nullable = false, length = 32)
+  private String customerAccountIdentifier;
+  @Column(name = "target_account_identifier", nullable = true, length = 32)
+  private String targetAccountIdentifier;
+  @Column(name = "clerk", nullable = false, length = 32)
+  private String clerk;
+  @Column(name = "amount", nullable = false)
+  private Double amount;
+  @Column(name = "a_state", nullable = false, length = 256)
+  private String state;
+
+  public TellerTransactionEntity() {
+    super();
   }
 
-  @ValidIdentifier(optional = true)
-  private String identifier;
-  @NotNull
-  private String transactionType;
-  @NotNull
-  private String transactionDate;
-  @ValidIdentifier
-  private String customerIdentifier;
-  @ValidIdentifier
-  private String productIdentifier;
-  @ValidIdentifier(optional = true)
-  private String productCaseIdentifier;
-  @ValidIdentifier
-  private String customerAccountIdentifier;
-  @ValidIdentifier(optional = true)
-  private String targetAccountIdentifier;
-  @ValidIdentifier
-  private String clerk;
-  @NotNull
-  @DecimalMin("0.00")
-  private Double amount;
-  private State state;
+  public Long getId() {
+    return this.id;
+  }
 
-  public TellerTransaction() {
-    super();
+  public void setId(final Long id) {
+    this.id = id;
+  }
+
+  public TellerEntity getTeller() {
+    return this.teller;
+  }
+
+  public void setTeller(final TellerEntity teller) {
+    this.teller = teller;
   }
 
   public String getIdentifier() {
@@ -71,20 +99,12 @@ public class TellerTransaction {
     this.transactionType = transactionType;
   }
 
-  public String getTransactionDate() {
+  public LocalDateTime getTransactionDate() {
     return this.transactionDate;
   }
 
-  public void setTransactionDate(final String transactionDate) {
+  public void setTransactionDate(final LocalDateTime transactionDate) {
     this.transactionDate = transactionDate;
-  }
-
-  public String getCustomerIdentifier() {
-    return this.customerIdentifier;
-  }
-
-  public void setCustomerIdentifier(final String customerIdentifier) {
-    this.customerIdentifier = customerIdentifier;
   }
 
   public String getProductIdentifier() {
@@ -136,10 +156,10 @@ public class TellerTransaction {
   }
 
   public String getState() {
-    return this.state.name();
+    return this.state;
   }
 
   public void setState(final String state) {
-    this.state = State.valueOf(state);
+    this.state = state;
   }
 }

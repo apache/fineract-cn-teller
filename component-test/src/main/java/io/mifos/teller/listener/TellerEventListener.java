@@ -81,4 +81,26 @@ public class TellerEventListener {
     this.logger.debug("Teller {} created.", payload);
     this.eventRecorder.event(tenant, EventConstants.CLOSE_TELLER, payload, String.class);
   }
+
+  @JmsListener(
+      destination = EventConstants.DESTINATION,
+      selector = EventConstants.SELECTOR_AUTHENTICATE_TELLER,
+      subscription = EventConstants.DESTINATION
+  )
+  public void onAuthenticate(@Header(TenantHeaderFilter.TENANT_HEADER) final String tenant,
+                      final String payload) {
+    this.logger.debug("Teller {} created.", payload);
+    this.eventRecorder.event(tenant, EventConstants.AUTHENTICATE_TELLER, payload, String.class);
+  }
+
+  @JmsListener(
+      destination = EventConstants.DESTINATION,
+      selector = EventConstants.SELECTOR_PAUSE_TELLER,
+      subscription = EventConstants.DESTINATION
+  )
+  public void onPause(@Header(TenantHeaderFilter.TENANT_HEADER) final String tenant,
+                             final String payload) {
+    this.logger.debug("Teller {} created.", payload);
+    this.eventRecorder.event(tenant, EventConstants.PAUSE_TELLER, payload, String.class);
+  }
 }

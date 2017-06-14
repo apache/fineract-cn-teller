@@ -80,7 +80,7 @@ public class AbstractTellerTest {
     }
   }
 
-  private static final String TEST_USER = "homer";
+  static final String TEST_USER = "homer";
 
   private final static TestEnvironment testEnvironment = new TestEnvironment(APP_NAME);
   private final static CassandraInitializer cassandraInitializer = new CassandraInitializer();

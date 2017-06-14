@@ -28,7 +28,6 @@ public class TellerMapper {
   public static Teller map(final TellerEntity tellerEntity) {
     final Teller teller = new Teller();
     teller.setCode(tellerEntity.getIdentifier());
-    teller.setPassword(tellerEntity.getPassword());
     teller.setTellerAccountIdentifier(tellerEntity.getTellerAccountIdentifier());
     teller.setVaultAccountIdentifier(tellerEntity.getVaultAccountIdentifier());
     teller.setCashdrawLimit(tellerEntity.getCashdrawLimit());

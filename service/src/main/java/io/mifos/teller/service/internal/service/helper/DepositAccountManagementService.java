@@ -15,12 +15,22 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
+import io.mifos.deposit.api.v1.EventConstants;
 import io.mifos.deposit.api.v1.client.DepositAccountManager;
+import io.mifos.deposit.api.v1.definition.domain.Action;
+import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
+import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.ServiceConstants;
+import io.mifos.teller.api.v1.domain.Charge;
+import io.mifos.teller.api.v1.domain.TellerTransaction;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class DepositAccountManagementService {
@@ -34,5 +44,47 @@ public class DepositAccountManagementService {
     super();
     this.logger = logger;
     this.depositAccountManager = depositAccountManager;
+  }
+
+  public List<ProductInstance> getProductInstance(final String customerIdentifier) {
+    return this.depositAccountManager.fetchProductInstances(customerIdentifier);
+  }
+
+  public List<Charge> getCharges(final TellerTransaction tellerTransaction) {
+    final List<Charge> charges = new ArrayList<>();
+    final ProductDefinition productDefinition =
+        this.depositAccountManager.findProductDefinition(tellerTransaction.getProductIdentifier());
+    final List<Action> actions = this.depositAccountManager.fetchActions();
+
+    final HashMap<String, Action> mappedActions = new HashMap<>(actions.size());
+    actions.forEach(action -> mappedActions.put(action.getIdentifier(), action));
+
+    final List<io.mifos.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
+    productCharges.forEach(productCharge -> {
+      final Action action = mappedActions.get(productCharge.getActionIdentifier());
+      if (action != null
+          && action.getTransactionType().equals(tellerTransaction.getTransactionType())) {
+        final Charge charge = new Charge();
+        charge.setCode(productCharge.getActionIdentifier());
+        charge.setIncomeAccountIdentifier(productCharge.getIncomeAccountIdentifier());
+        charge.setName(productCharge.getName());
+        if (productCharge.getProportional()) {
+          final Double amount = tellerTransaction.getAmount();
+          charge.setAmount(amount / 100.0D * productCharge.getAmount());
+        } else {
+          charge.setAmount(productCharge.getAmount());
+        }
+        charges.add(charge);
+      }
+    });
+    return charges;
+  }
+
+  public void activateProductInstance(final String customerAccountIdentifier) {
+    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.ACTIVATE_PRODUCT_INSTANCE);
+  }
+
+  public void closeProductInstance(final String customerAccountIdentifier) {
+    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.CLOSE_PRODUCT_INSTANCE);
   }
 }

@@ -15,8 +15,61 @@
  */
 package io.mifos.teller.service.internal.service;
 
+import io.mifos.core.lang.ServiceException;
+import io.mifos.teller.ServiceConstants;
+import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.service.internal.mapper.TellerTransactionMapper;
+import io.mifos.teller.service.internal.repository.TellerEntity;
+import io.mifos.teller.service.internal.repository.TellerRepository;
+import io.mifos.teller.service.internal.repository.TellerTransactionRepository;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class TellerOperationService {
+
+  private final Logger logger;
+  private final TellerRepository tellerRepository;
+  private final TellerTransactionRepository tellerTransactionRepository;
+
+  @Autowired
+  public TellerOperationService(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
+                                final TellerRepository tellerRepository,
+                                final TellerTransactionRepository tellerTransactionRepository) {
+    super();
+    this.logger = logger;
+    this.tellerRepository = tellerRepository;
+    this.tellerTransactionRepository = tellerTransactionRepository;
+  }
+
+  public boolean tellerTransactionExists(final String tellerTransactionIdentifier) {
+    return this.tellerTransactionRepository.findByIdentifier(tellerTransactionIdentifier).isPresent();
+  }
+
+  public List<TellerTransaction> fetchTellerTransactions(final String tellerCode, final String state) {
+    final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTellerEntity.isPresent()) {
+      final TellerEntity tellerEntity = optionalTellerEntity.get();
+      if (state != null) {
+        return this.tellerTransactionRepository.findByTellerAndStateOrderByTransactionDateAsc(tellerEntity, state)
+            .stream()
+            .map(TellerTransactionMapper::map)
+            .collect(Collectors.toList());
+      } else {
+        return this.tellerTransactionRepository.findByTellerOrderByTransactionDateAsc(tellerEntity)
+            .stream()
+            .map(TellerTransactionMapper::map)
+            .collect(Collectors.toList());
+      }
+    } else {
+      throw ServiceException.notFound("Teller {0} not found.", tellerCode);
+    }
+  }
 }

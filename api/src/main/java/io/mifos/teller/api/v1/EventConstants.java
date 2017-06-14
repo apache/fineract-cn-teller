@@ -33,4 +33,17 @@ public interface EventConstants {
   String SELECTOR_OPEN_TELLER = SELECTOR_NAME + " = '" + OPEN_TELLER + "'";
   String CLOSE_TELLER = "close-teller";
   String SELECTOR_CLOSE_TELLER = SELECTOR_NAME + " = '" + CLOSE_TELLER + "'";
+  String ACTIVATE_TELLER = "activate-teller";
+  String SELECTOR_ACTIVATE_TELLER = SELECTOR_NAME + " = '" + ACTIVATE_TELLER + "'";
+  String PAUSE_TELLER = "pause-teller";
+  String SELECTOR_PAUSE_TELLER = SELECTOR_NAME + " = '" + PAUSE_TELLER + "'";
+
+  String INIT_TRANSACTION = "init-transaction";
+  String SELECTOR_INIT_TRANSACTION = SELECTOR_NAME + " = '" + INIT_TRANSACTION + "'";
+  String CONFIRM_TRANSACTION = "confirm-transaction";
+  String SELECTOR_CONFIRM_TRANSACTION = SELECTOR_NAME + " = '" + CONFIRM_TRANSACTION + "'";
+  String CANCEL_TRANSACTION = "cancel-transaction";
+  String SELECTOR_CANCEL_TRANSACTION = SELECTOR_NAME + " = '" + CANCEL_TRANSACTION + "'";
+  String AUTHENTICATE_TELLER = "authenticate-teller";
+  String SELECTOR_AUTHENTICATE_TELLER = SELECTOR_NAME + " = '" + AUTHENTICATE_TELLER + "'";
 }

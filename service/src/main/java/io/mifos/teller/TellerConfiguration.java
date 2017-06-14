@@ -63,7 +63,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
     "io.mifos.teller.service.rest",
     "io.mifos.teller.service.internal.service",
     "io.mifos.teller.service.internal.repository",
-    "io.mifos.teller.service.internal.command.handler"
+    "io.mifos.teller.service.internal.command.handler",
+    "io.mifos.teller.service.internal.processor"
 })
 @EnableJpaRepositories({
     "io.mifos.teller.service.internal.repository"

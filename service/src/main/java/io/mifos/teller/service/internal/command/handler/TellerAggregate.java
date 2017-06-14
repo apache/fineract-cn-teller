@@ -24,14 +24,18 @@ import io.mifos.core.command.annotation.Aggregate;
 import io.mifos.core.command.annotation.CommandHandler;
 import io.mifos.core.command.annotation.EventEmitter;
 import io.mifos.core.lang.DateConverter;
+import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.domain.Teller;
+import io.mifos.teller.api.v1.domain.TellerAuthentication;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
+import io.mifos.teller.service.internal.command.AuthenticateTellerCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
+import io.mifos.teller.service.internal.command.PauseTellerCommand;
 import io.mifos.teller.service.internal.mapper.TellerMapper;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
@@ -113,7 +117,9 @@ public class TellerAggregate {
       if (optionalTellerEntity.isPresent()) {
         final TellerEntity tellerEntity = optionalTellerEntity.get();
 
-        this.encryptPassword(teller, tellerEntity);
+        if (teller.getPassword() != null) {
+          this.encryptPassword(teller, tellerEntity);
+        }
 
         tellerEntity.setTellerAccountIdentifier(teller.getTellerAccountIdentifier());
         tellerEntity.setVaultAccountIdentifier(teller.getVaultAccountIdentifier());
@@ -145,7 +151,9 @@ public class TellerAggregate {
 
       if (this.checkPreconditions(tellerEntity.getOfficeIdentifier(), TellerMapper.map(tellerEntity))) {
 
-        if (tellerManagementCommand.getAmount() != null && tellerManagementCommand.getAmount() > 0.00D) {
+        if (!tellerManagementCommand.getAdjustment().equals(TellerManagementCommand.Adjustment.NONE.name())
+            && tellerManagementCommand.getAmount() != null
+            && tellerManagementCommand.getAmount() > 0.00D) {
           this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
         }
 
@@ -177,7 +185,9 @@ public class TellerAggregate {
 
       if (this.checkPreconditions(tellerEntity.getOfficeIdentifier(), TellerMapper.map(tellerEntity))) {
 
-        if (tellerManagementCommand.getAmount() != null && tellerManagementCommand.getAmount() > 0.00D) {
+        if (!tellerManagementCommand.getAdjustment().equals(TellerManagementCommand.Adjustment.NONE.name())
+            && tellerManagementCommand.getAmount() != null
+            && tellerManagementCommand.getAmount() > 0.00D) {
           this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
         }
         tellerEntity.setAssignedEmployeeIdentifier(null);
@@ -193,6 +203,69 @@ public class TellerAggregate {
     } else {
       throw new IllegalStateException("Teller " + tellerCode + " not found.");
     }
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.AUTHENTICATE_TELLER)
+  public String process(final AuthenticateTellerCommand authenticateTellerCommand) {
+    final String tellerCode = authenticateTellerCommand.tellerCode();
+    final TellerAuthentication tellerAuthentication = authenticateTellerCommand.tellerAuthentication();
+
+    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTeller.isPresent()) {
+      final TellerEntity tellerEntity = optionalTeller.get();
+      if (!tellerEntity.getState().equals(Teller.State.OPEN.name())
+          && !tellerEntity.getState().equals(Teller.State.PAUSED.name())) {
+        throw ServiceException.notFound("Teller {0} not found.", tellerCode);
+      }
+
+      if (!UserContextHolder.checkedGetUser().equals(tellerEntity.getAssignedEmployeeIdentifier())) {
+        throw ServiceException.notFound("Teller {0} not found.", tellerCode);
+      }
+
+      final byte[] givenPassword = this.hashGenerator.hash(new String(tellerAuthentication.getPassword()),
+          Base64Utils.decodeFromString(tellerEntity.getSalt()), ServiceConstants.ITERATION_COUNT, ServiceConstants.LENGTH);
+
+      if (!tellerEntity.getPassword().equals(Base64Utils.encodeToString(givenPassword))) {
+        throw ServiceException.notFound("Teller {0} not found.", tellerCode);
+      }
+
+      tellerEntity.setState(Teller.State.ACTIVE.name());
+      tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
+      tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+      this.tellerRepository.save(tellerEntity);
+
+      return tellerCode;
+    } else {
+      throw ServiceException.notFound("Teller {0} not found.", tellerCode);
+    }
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.PAUSE_TELLER)
+  public String process(final PauseTellerCommand pauseTellerCommand) {
+    final String tellerCode = pauseTellerCommand.tellerCode();
+
+    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTeller.isPresent()) {
+      final TellerEntity tellerEntity = optionalTeller.get();
+      if (UserContextHolder.checkedGetUser().equals(tellerEntity.getAssignedEmployeeIdentifier())
+          && tellerEntity.getState().equals(Teller.State.ACTIVE.name())) {
+        tellerEntity.setState(Teller.State.PAUSED.name());
+        tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
+        tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+        this.tellerRepository.save(tellerEntity);
+
+        return tellerCode;
+      } else {
+        this.logger.warn("Unable to pause teller {}.", tellerCode);
+      }
+    } else {
+      this.logger.warn("Teller {} not found.", tellerCode);
+    }
+    return null;
   }
 
   private boolean checkPreconditions(final String officeIdentifier, final Teller teller) {
@@ -245,7 +318,7 @@ public class TellerAggregate {
     final Creditor creditor = new Creditor();
     switch (adjustment) {
       case DEBIT:
-        journalEntry.setTransactionType("DAJT");
+        journalEntry.setTransactionType(ServiceConstants.TX_DEPOSIT_ADJUSTMENT);
 
         debtor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
         debtor.setAmount(tellerManagementCommand.getAmount().toString());
@@ -257,7 +330,7 @@ public class TellerAggregate {
 
         break;
       case CREDIT:
-        journalEntry.setTransactionType("CAJT");
+        journalEntry.setTransactionType(ServiceConstants.TX_CREDIT_ADJUSTMENT);
 
         debtor.setAccountNumber(tellerEntity.getVaultAccountIdentifier());
         debtor.setAmount(tellerManagementCommand.getAmount().toString());

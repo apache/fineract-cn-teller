@@ -125,9 +125,10 @@ public interface TellerManager {
   )
   @ThrowsExceptions({
       @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
-      @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerNotFoundException.class)
+      @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerNotFoundException.class)
   })
-  void auth(@PathVariable("tellerCode") final String tellerCode,
+  String auth(@PathVariable("tellerCode") final String tellerCode,
             @RequestBody @Valid final TellerAuthentication tellerAuthentication);
 
   @RequestMapping(
@@ -137,7 +138,8 @@ public interface TellerManager {
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   @ThrowsExceptions({
-      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class)
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerValidationException.class)
   })
   void post(@PathVariable("tellerCode") final String tellerCode,
             @RequestParam(value = "command", required = true) final String command);
