@@ -23,10 +23,10 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.TellerAuthentication;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
-import io.mifos.teller.service.internal.command.AuthenticateTellerCommand;
+import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.CancelTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.ConfirmTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.InitializeTellerTransactionCommand;
@@ -76,26 +76,29 @@ public class TellerOperationRestController {
 
   @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_OPERATION)
   @RequestMapping(
-      value = "/auth",
+      value = "/drawer",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   @ResponseBody
-  ResponseEntity<String> auth(@PathVariable("tellerCode") final String tellerCode,
-                            @RequestBody @Valid final TellerAuthentication tellerAuthentication) {
+  ResponseEntity<Void> unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
+                                    @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand) {
     final Teller teller = this.verifyTeller(tellerCode);
 
-    if (!teller.getAssignedEmployee().equals(tellerAuthentication.getEmployeeIdentifier())) {
-      throw ServiceException.badRequest("User {0} is not assigned to teller.", tellerAuthentication.getEmployeeIdentifier());
+    if (!teller.getAssignedEmployee().equals(unlockDrawerCommand.getEmployeeIdentifier())) {
+      throw ServiceException.badRequest("User {0} is not assigned to teller.", unlockDrawerCommand.getEmployeeIdentifier());
     }
 
     this.verifyEmployee(teller);
 
     try {
-      return ResponseEntity.ok(
-          this.commandGateway.process(new AuthenticateTellerCommand(tellerCode, tellerAuthentication), String.class).get()
-      );
+      final String unlockedTeller =
+          this.commandGateway.process(new DrawerUnlockCommand(tellerCode, unlockDrawerCommand), String.class).get();
+
+      this.logger.debug("Drawer {0} unlocked", unlockedTeller);
+
+      return ResponseEntity.ok().build();
     } catch (final Exception e) {
       throw ServiceException.notFound("Teller {0} not found.", teller.getCode());
     }

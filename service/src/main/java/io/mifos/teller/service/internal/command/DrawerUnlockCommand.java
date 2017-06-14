@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller.api.v1.domain;
+package io.mifos.teller.service.internal.command;
 
-public class TellerAuthentication {
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 
-  private String employeeIdentifier;
-  private String password;
+public class DrawerUnlockCommand {
+  private final String tellerCode;
+  private final UnlockDrawerCommand unlockDrawerCommand;
 
-  public TellerAuthentication() {
+  public DrawerUnlockCommand(final String tellerCode, final UnlockDrawerCommand unlockDrawerCommand) {
     super();
+    this.tellerCode = tellerCode;
+    this.unlockDrawerCommand = unlockDrawerCommand;
   }
 
-  public String getEmployeeIdentifier() {
-    return this.employeeIdentifier;
+  public String tellerCode() {
+    return this.tellerCode;
   }
 
-  public void setEmployeeIdentifier(final String employeeIdentifier) {
-    this.employeeIdentifier = employeeIdentifier;
-  }
-
-  public String getPassword() {
-    return this.password;
-  }
-
-  public void setPassword(final String password) {
-    this.password = password;
+  public UnlockDrawerCommand tellerAuthentication() {
+    return this.unlockDrawerCommand;
   }
 }

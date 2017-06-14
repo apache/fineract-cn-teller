@@ -19,7 +19,7 @@ import io.mifos.core.api.annotation.ThrowsException;
 import io.mifos.core.api.annotation.ThrowsExceptions;
 import io.mifos.core.api.util.CustomFeignClientsConfiguration;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.TellerAuthentication;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
@@ -118,7 +118,7 @@ public interface TellerManager {
                                 @PathVariable("tellerCode") final String tellerCode);
 
   @RequestMapping(
-      value = "/teller/{tellerCode}/auth",
+      value = "/teller/{tellerCode}/drawer",
       method = RequestMethod.POST,
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE
@@ -128,8 +128,8 @@ public interface TellerManager {
       @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerNotFoundException.class),
       @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerNotFoundException.class)
   })
-  String auth(@PathVariable("tellerCode") final String tellerCode,
-            @RequestBody @Valid final TellerAuthentication tellerAuthentication);
+  void unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
+                    @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand);
 
   @RequestMapping(
       value = "/teller/{tellerCode}",

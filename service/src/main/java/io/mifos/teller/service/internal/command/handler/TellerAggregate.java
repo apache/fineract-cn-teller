@@ -28,9 +28,9 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.TellerAuthentication;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
-import io.mifos.teller.service.internal.command.AuthenticateTellerCommand;
+import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
@@ -208,15 +208,14 @@ public class TellerAggregate {
   @Transactional
   @CommandHandler
   @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.AUTHENTICATE_TELLER)
-  public String process(final AuthenticateTellerCommand authenticateTellerCommand) {
-    final String tellerCode = authenticateTellerCommand.tellerCode();
-    final TellerAuthentication tellerAuthentication = authenticateTellerCommand.tellerAuthentication();
+  public String process(final DrawerUnlockCommand drawerUnlockCommand) {
+    final String tellerCode = drawerUnlockCommand.tellerCode();
+    final UnlockDrawerCommand unlockDrawerCommand = drawerUnlockCommand.tellerAuthentication();
 
     final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
     if (optionalTeller.isPresent()) {
       final TellerEntity tellerEntity = optionalTeller.get();
-      if (!tellerEntity.getState().equals(Teller.State.OPEN.name())
-          && !tellerEntity.getState().equals(Teller.State.PAUSED.name())) {
+      if (tellerEntity.getState().equals(Teller.State.CLOSED.name())) {
         throw ServiceException.notFound("Teller {0} not found.", tellerCode);
       }
 
@@ -224,7 +223,7 @@ public class TellerAggregate {
         throw ServiceException.notFound("Teller {0} not found.", tellerCode);
       }
 
-      final byte[] givenPassword = this.hashGenerator.hash(tellerAuthentication.getPassword(),
+      final byte[] givenPassword = this.hashGenerator.hash(unlockDrawerCommand.getPassword(),
           Base64Utils.decodeFromString(tellerEntity.getSalt()), ServiceConstants.ITERATION_COUNT, ServiceConstants.LENGTH);
 
       if (!tellerEntity.getPassword().equals(Base64Utils.encodeToString(givenPassword))) {

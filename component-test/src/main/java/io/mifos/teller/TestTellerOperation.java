@@ -20,7 +20,7 @@ import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerValidationException;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.TellerAuthentication;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.util.TellerGenerator;
@@ -44,13 +44,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldAuthenticate() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    final String auth = super.testSubject.auth(teller.getCode(), tellerAuthentication);
-
-    Assert.assertEquals(auth, teller.getCode());
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
   }
 
 
@@ -58,33 +56,33 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldNotAuthenticateUserMismatch() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier("unassigneduser");
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier("unassigneduser");
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
   }
 
   @Test(expected = TellerNotFoundException.class)
   public void shouldNotAuthenticatePasswordMismatch() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword("wrongpasword");
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword("wrongpasword");
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
   }
 
   @Test
   public void shouldPauseTeller() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
@@ -104,11 +102,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldOpenAccount() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
@@ -135,11 +133,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldCloseAccount() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
@@ -166,11 +164,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldTransferAccountToAccount() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
@@ -200,11 +198,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldDeposit() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
@@ -231,11 +229,11 @@ public class TestTellerOperation extends AbstractTellerTest {
   public void shouldWithdraw() throws Exception {
     final Teller teller = this.prepareTeller();
 
-    final TellerAuthentication tellerAuthentication = new TellerAuthentication();
-    tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword());
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
 
-    super.testSubject.auth(teller.getCode(), tellerAuthentication);
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
 
     super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
 
