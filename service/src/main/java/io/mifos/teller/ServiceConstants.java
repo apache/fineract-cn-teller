@@ -23,9 +23,9 @@ public interface ServiceConstants {
 
   String TX_OPEN_ACCOUNT = "ACCO";
   String TX_CLOSE_ACCOUNT = "ACCC";
-  String TX_ACCOUNT_TRANSFER = "BACT";
-  String TX_CASH_DEPOSIT = "BCDP";
-  String TX_CASH_WITHDRAWAL = "BCWD";
+  String TX_ACCOUNT_TRANSFER = "ACCT";
+  String TX_CASH_DEPOSIT = "CDPT";
+  String TX_CASH_WITHDRAWAL = "CWDL";
 
   String TX_DEPOSIT_ADJUSTMENT = "DAJT";
   String TX_CREDIT_ADJUSTMENT = "CAJT";
