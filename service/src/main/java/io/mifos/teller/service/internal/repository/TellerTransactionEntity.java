@@ -48,6 +48,8 @@ public class TellerTransactionEntity {
   @Column(name = "transaction_date", nullable = false)
   @Convert(converter = LocalDateTimeConverter.class)
   private LocalDateTime transactionDate;
+  @Column(name = "customer_identifier", nullable = false, length = 32)
+  private String customerIdentifier;
   @Column(name = "product_identifier", nullable = false, length = 32)
   private String productIdentifier;
   @Column(name = "product_case_identifier", nullable = true, length = 32)
@@ -105,6 +107,14 @@ public class TellerTransactionEntity {
 
   public void setTransactionDate(final LocalDateTime transactionDate) {
     this.transactionDate = transactionDate;
+  }
+
+  public String getCustomerIdentifier() {
+    return this.customerIdentifier;
+  }
+
+  public void setCustomerIdentifier(final String customerIdentifier) {
+    this.customerIdentifier = customerIdentifier;
   }
 
   public String getProductIdentifier() {

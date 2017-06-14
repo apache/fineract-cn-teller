@@ -30,6 +30,7 @@ public class TellerTransactionMapper {
     tellerTransaction.setIdentifier(tellerTransactionEntity.getIdentifier());
     tellerTransaction.setTransactionType(tellerTransactionEntity.getTransactionType());
     tellerTransaction.setTransactionDate(DateConverter.toIsoString(tellerTransactionEntity.getTransactionDate()));
+    tellerTransaction.setCustomerIdentifier(tellerTransactionEntity.getCustomerIdentifier());
     tellerTransaction.setProductIdentifier(tellerTransactionEntity.getProductIdentifier());
     tellerTransaction.setProductCaseIdentifier(tellerTransactionEntity.getProductCaseIdentifier());
     tellerTransaction.setCustomerAccountIdentifier(tellerTransactionEntity.getCustomerAccountIdentifier());
@@ -46,6 +47,7 @@ public class TellerTransactionMapper {
     tellerTransactionEntity.setIdentifier(tellerTransaction.getIdentifier());
     tellerTransactionEntity.setTransactionType(tellerTransaction.getTransactionType());
     tellerTransactionEntity.setTransactionDate(DateConverter.fromIsoString(tellerTransaction.getTransactionDate()));
+    tellerTransactionEntity.setCustomerIdentifier(tellerTransaction.getCustomerIdentifier());
     tellerTransactionEntity.setProductIdentifier(tellerTransaction.getProductIdentifier());
     tellerTransactionEntity.setProductCaseIdentifier(tellerTransaction.getProductCaseIdentifier());
     tellerTransactionEntity.setCustomerAccountIdentifier(tellerTransaction.getCustomerAccountIdentifier());

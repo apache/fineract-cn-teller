@@ -39,6 +39,7 @@ CREATE TABLE tajet_teller_transactions (
   identifier                  VARCHAR(32)    NOT NULL,
   transaction_type            VARCHAR(32)    NOT NULL,
   transaction_date            TIMESTAMP(3)   NOT NULL,
+  customer_identifier         VARCHAR(32)    NOT NULL,
   product_identifier          VARCHAR(32)    NOT NULL,
   product_case_identifier     VARCHAR(32)    NULL,
   customer_account_identifier VARCHAR(32)    NOT NULL,
