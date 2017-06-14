@@ -154,6 +154,7 @@ public class TellerTransactionProcessor {
     final Debtor customerDebtor = new Debtor();
     customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
     customerDebtor.setAmount(chargesTotal.toString());
+    debtors.add(customerDebtor);
 
     final HashSet<Creditor> creditors = new HashSet<>();
     journalEntry.setCreditors(creditors);
@@ -185,6 +186,7 @@ public class TellerTransactionProcessor {
     final Debtor customerDebtor = new Debtor();
     customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
     customerDebtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
+    debtors.add(customerDebtor);
 
     final HashSet<Creditor> creditors = new HashSet<>();
     journalEntry.setCreditors(creditors);
