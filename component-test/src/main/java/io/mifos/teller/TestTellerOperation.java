@@ -46,7 +46,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     final String auth = super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -60,7 +60,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier("unassigneduser");
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
   }
@@ -71,7 +71,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword("wrongpasword".getBytes());
+    tellerAuthentication.setPassword("wrongpasword");
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
   }
@@ -82,7 +82,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -106,7 +106,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -137,7 +137,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -168,7 +168,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -202,7 +202,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 
@@ -233,7 +233,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final TellerAuthentication tellerAuthentication = new TellerAuthentication();
     tellerAuthentication.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
-    tellerAuthentication.setPassword(teller.getPassword().getBytes());
+    tellerAuthentication.setPassword(teller.getPassword());
 
     super.testSubject.auth(teller.getCode(), tellerAuthentication);
 

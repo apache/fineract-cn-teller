@@ -18,7 +18,7 @@ package io.mifos.teller.api.v1.domain;
 public class TellerAuthentication {
 
   private String employeeIdentifier;
-  private byte[] password;
+  private String password;
 
   public TellerAuthentication() {
     super();
@@ -32,11 +32,11 @@ public class TellerAuthentication {
     this.employeeIdentifier = employeeIdentifier;
   }
 
-  public byte[] getPassword() {
+  public String getPassword() {
     return this.password;
   }
 
-  public void setPassword(final byte[] password) {
+  public void setPassword(final String password) {
     this.password = password;
   }
 }

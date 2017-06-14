@@ -224,7 +224,7 @@ public class TellerAggregate {
         throw ServiceException.notFound("Teller {0} not found.", tellerCode);
       }
 
-      final byte[] givenPassword = this.hashGenerator.hash(new String(tellerAuthentication.getPassword()),
+      final byte[] givenPassword = this.hashGenerator.hash(tellerAuthentication.getPassword(),
           Base64Utils.decodeFromString(tellerEntity.getSalt()), ServiceConstants.ITERATION_COUNT, ServiceConstants.LENGTH);
 
       if (!tellerEntity.getPassword().equals(Base64Utils.encodeToString(givenPassword))) {
