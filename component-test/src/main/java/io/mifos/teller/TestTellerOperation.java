@@ -287,4 +287,29 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     return teller;
   }
+
+  @Test(expected = TellerNotFoundException.class)
+  public void shouldNotUnlockTellerClosed() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+
+    super.testSubject.create(officeIdentifier, teller);
+
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+  }
 }

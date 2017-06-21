@@ -86,6 +86,10 @@ public class TellerOperationRestController {
                                     @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand) {
     final Teller teller = this.verifyTeller(tellerCode);
 
+    if (teller.getState().equals(Teller.State.CLOSED.name())) {
+      throw ServiceException.badRequest("Teller {0} is closed.", teller.getCode());
+    }
+
     if (!teller.getAssignedEmployee().equals(unlockDrawerCommand.getEmployeeIdentifier())) {
       throw ServiceException.badRequest("User {0} is not assigned to teller.", unlockDrawerCommand.getEmployeeIdentifier());
     }
