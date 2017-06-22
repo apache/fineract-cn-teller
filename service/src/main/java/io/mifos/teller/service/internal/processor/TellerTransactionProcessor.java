@@ -115,7 +115,11 @@ public class TellerTransactionProcessor {
 
     final Debtor debtor = new Debtor();
     debtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    debtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
+    if (!tellerTransactionCosts.getCharges().isEmpty()) {
+      debtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
+    } else {
+      debtor.setAmount(tellerTransaction.getAmount().toString());
+    }
     debtors.add(debtor);
 
     final HashSet<Creditor> creditors = new HashSet<>();
@@ -150,11 +154,13 @@ public class TellerTransactionProcessor {
     tellerDebtor.setAmount(tellerTransaction.getAmount().toString());
     debtors.add(tellerDebtor);
 
-    final Double chargesTotal = tellerTransactionCosts.getTotalAmount() - tellerTransaction.getAmount();
-    final Debtor customerDebtor = new Debtor();
-    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerDebtor.setAmount(chargesTotal.toString());
-    debtors.add(customerDebtor);
+    if (!tellerTransactionCosts.getCharges().isEmpty()) {
+      final Double chargesTotal = tellerTransactionCosts.getTotalAmount() - tellerTransaction.getAmount();
+      final Debtor customerDebtor = new Debtor();
+      customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+      customerDebtor.setAmount(chargesTotal.toString());
+      debtors.add(customerDebtor);
+    }
 
     final HashSet<Creditor> creditors = new HashSet<>();
     journalEntry.setCreditors(creditors);
@@ -185,7 +191,11 @@ public class TellerTransactionProcessor {
 
     final Debtor customerDebtor = new Debtor();
     customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerDebtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
+    if (!tellerTransactionCosts.getCharges().isEmpty()) {
+      customerDebtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
+    } else {
+      customerDebtor.setAmount(tellerTransaction.getAmount().toString());
+    }
     debtors.add(customerDebtor);
 
     final HashSet<Creditor> creditors = new HashSet<>();
