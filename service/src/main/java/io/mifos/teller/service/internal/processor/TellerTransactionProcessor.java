@@ -144,6 +144,7 @@ public class TellerTransactionProcessor {
 
     final TellerEntity tellerEntity = optionalTeller.get();
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
+    journalEntry.setMessage(tellerTransaction.getTransactionType());
     final TellerTransactionCosts tellerTransactionCosts = this.depositAccountCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
