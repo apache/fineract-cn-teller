@@ -19,11 +19,11 @@ import io.mifos.core.api.annotation.ThrowsException;
 import io.mifos.core.api.annotation.ThrowsExceptions;
 import io.mifos.core.api.util.CustomFeignClientsConfiguration;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -152,7 +152,8 @@ public interface TellerManager {
   )
   @ThrowsExceptions({
       @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
-      @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerTransactionValidationException.class)
+      @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerTransactionValidationException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TransactionProcessingException.class)
   })
   TellerTransactionCosts post(@PathVariable("tellerCode") final String tellerCode,
                               @RequestBody @Valid final TellerTransaction tellerTransaction);

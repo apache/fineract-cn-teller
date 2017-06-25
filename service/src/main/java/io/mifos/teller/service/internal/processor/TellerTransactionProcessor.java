@@ -19,6 +19,7 @@ import io.mifos.accounting.api.v1.domain.Creditor;
 import io.mifos.accounting.api.v1.domain.Debtor;
 import io.mifos.accounting.api.v1.domain.JournalEntry;
 import io.mifos.core.api.util.UserContextHolder;
+import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
@@ -144,7 +145,6 @@ public class TellerTransactionProcessor {
 
     final TellerEntity tellerEntity = optionalTeller.get();
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    journalEntry.setMessage(tellerTransaction.getTransactionType());
     final TellerTransactionCosts tellerTransactionCosts = this.depositAccountCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
@@ -214,7 +214,7 @@ public class TellerTransactionProcessor {
 
   private void processDepositAccountClosing(final String tellerCode, final TellerTransaction tellerTransaction) {
     final List<ProductInstance> productInstances =
-        this.depositAccountManagementService.getProductInstance(tellerTransaction.getCustomerIdentifier());
+        this.depositAccountManagementService.fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     this.processCashWithdrawal(tellerCode, tellerTransaction);
 
@@ -227,17 +227,18 @@ public class TellerTransactionProcessor {
   }
 
   private void processDepositAccountOpening(final String tellerCode, final TellerTransaction tellerTransaction) {
-    final List<ProductInstance> productInstances =
-        this.depositAccountManagementService.getProductInstance(tellerTransaction.getCustomerIdentifier());
+    final ProductInstance productInstances =
+        this.depositAccountManagementService.findProductInstance(tellerTransaction.getCustomerAccountIdentifier());
+
+    final ProductDefinition productDefinition =
+        this.depositAccountManagementService.findProductDefinition(productInstances.getProductIdentifier());
 
     this.processCashDeposit(tellerCode, tellerTransaction);
 
-    productInstances.forEach(productInstance -> {
-      if (productInstance.getAccountIdentifier().equals(tellerTransaction.getCustomerAccountIdentifier())) {
-        this.depositAccountManagementService.activateProductInstance(tellerTransaction.getCustomerAccountIdentifier());
-        this.accountingService.openAccount(tellerTransaction.getCustomerAccountIdentifier());
-      }
-    });
+    if ((tellerTransaction.getAmount() + productInstances.getBalance()) >= productDefinition.getMinimumBalance()) {
+      this.depositAccountManagementService.activateProductInstance(tellerTransaction.getCustomerAccountIdentifier());
+      this.accountingService.openAccount(tellerTransaction.getCustomerAccountIdentifier());
+    }
   }
 
   private JournalEntry prepareJournalEntry(final TellerTransaction tellerTransaction) {
@@ -245,6 +246,7 @@ public class TellerTransactionProcessor {
     journalEntry.setTransactionIdentifier(tellerTransaction.getIdentifier());
     journalEntry.setTransactionDate(tellerTransaction.getTransactionDate());
     journalEntry.setTransactionType(tellerTransaction.getTransactionType());
+    journalEntry.setMessage(tellerTransaction.getTransactionType());
     journalEntry.setClerk(UserContextHolder.checkedGetUser());
 
     return journalEntry;

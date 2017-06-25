@@ -46,8 +46,12 @@ public class DepositAccountManagementService {
     this.depositAccountManager = depositAccountManager;
   }
 
-  public List<ProductInstance> getProductInstance(final String customerIdentifier) {
+  public List<ProductInstance> fetchProductInstances(final String customerIdentifier) {
     return this.depositAccountManager.fetchProductInstances(customerIdentifier);
+  }
+
+  public ProductInstance findProductInstance(final String accountIdentifier) {
+    return this.depositAccountManager.findProductInstance(accountIdentifier);
   }
 
   public List<Charge> getCharges(final TellerTransaction tellerTransaction) {
@@ -86,5 +90,9 @@ public class DepositAccountManagementService {
 
   public void closeProductInstance(final String customerAccountIdentifier) {
     this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.CLOSE_PRODUCT_INSTANCE_COMMAND);
+  }
+
+  public ProductDefinition findProductDefinition(final String productIdentifier) {
+    return this.depositAccountManager.findProductDefinition(productIdentifier);
   }
 }

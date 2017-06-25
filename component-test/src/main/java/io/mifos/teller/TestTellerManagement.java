@@ -15,6 +15,7 @@
  */
 package io.mifos.teller;
 
+import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerAlreadyExistsException;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
@@ -30,6 +31,7 @@ import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class TestTellerManagement extends AbstractTellerTest {
 
@@ -45,11 +47,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -72,8 +74,8 @@ public class TestTellerManagement extends AbstractTellerTest {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
     final Teller teller = TellerGenerator.createRandomTeller();
 
-    Mockito.doAnswer(invocation -> false)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.empty())
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
   }
@@ -83,8 +85,8 @@ public class TestTellerManagement extends AbstractTellerTest {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
     final Teller teller = TellerGenerator.createRandomTeller();
 
-    Mockito.doAnswer(invocation -> false)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.empty())
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
   }
@@ -98,11 +100,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -119,11 +121,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -172,11 +174,11 @@ public class TestTellerManagement extends AbstractTellerTest {
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
     tellerToCreate.forEach(teller -> {
-      Mockito.doAnswer(invocation -> true)
-          .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-      Mockito.doAnswer(invocation -> true)
-          .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
       super.testSubject.create(officeIdentifier, teller);
 
@@ -210,11 +212,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -240,11 +242,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -264,11 +266,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -276,8 +278,8 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     teller.setTellerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
 
-    Mockito.doAnswer(invocation -> false)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.empty())
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
     super.testSubject.change(officeIdentifier, teller.getCode(), teller);
   }
@@ -290,11 +292,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -302,8 +304,8 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     teller.setVaultAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
 
-    Mockito.doAnswer(invocation -> false)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.empty())
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.change(officeIdentifier, teller.getCode(), teller);
   }
@@ -318,11 +320,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -349,11 +351,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -384,11 +386,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -425,11 +427,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -450,11 +452,11 @@ public class TestTellerManagement extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 

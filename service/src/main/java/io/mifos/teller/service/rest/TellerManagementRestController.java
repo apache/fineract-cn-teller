@@ -209,7 +209,7 @@ public class TellerManagementRestController {
   }
 
   private void verifyAccount(final String accountIdentifier) {
-    if (!this.accountingService.accountExists(accountIdentifier)) {
+    if (!this.accountingService.findAccount(accountIdentifier).isPresent()) {
       throw ServiceException.badRequest("Account {0} not found.", accountIdentifier);
     }
   }

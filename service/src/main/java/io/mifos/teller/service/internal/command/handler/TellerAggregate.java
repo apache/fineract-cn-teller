@@ -28,12 +28,12 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
-import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
+import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
 import io.mifos.teller.service.internal.command.PauseTellerCommand;
 import io.mifos.teller.service.internal.mapper.TellerMapper;
@@ -275,12 +275,12 @@ public class TellerAggregate {
       pass = false;
     }
 
-    if (!this.accountingService.accountExists(teller.getTellerAccountIdentifier())) {
+    if (!this.accountingService.findAccount(teller.getTellerAccountIdentifier()).isPresent()) {
       this.logger.warn("Teller account {} not found.", teller.getTellerAccountIdentifier());
       pass = false;
     }
 
-    if (!this.accountingService.accountExists(teller.getVaultAccountIdentifier())) {
+    if (!this.accountingService.findAccount(teller.getVaultAccountIdentifier()).isPresent()) {
       this.logger.warn("Vault account {} not found.", teller.getVaultAccountIdentifier());
       pass = false;
     }

@@ -15,14 +15,16 @@
  */
 package io.mifos.teller;
 
+import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerValidationException;
+import io.mifos.teller.api.v1.client.TransactionProcessingException;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
@@ -33,6 +35,7 @@ import org.mockito.Mockito;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 
 public class TestTellerOperation extends AbstractTellerTest {
 
@@ -119,12 +122,12 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
-        .when(super.depositAccountManagementServiceSpy).getProductInstance(tellerTransaction.getCustomerIdentifier());
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
@@ -150,12 +153,14 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getCustomerAccountIdentifier());
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
-        .when(super.depositAccountManagementServiceSpy).getProductInstance(tellerTransaction.getCustomerIdentifier());
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
@@ -182,14 +187,16 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getCustomerAccountIdentifier());
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getTargetAccountIdentifier());
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getTargetAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
-        .when(super.depositAccountManagementServiceSpy).getProductInstance(tellerTransaction.getCustomerIdentifier());
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
@@ -215,12 +222,12 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
-        .when(super.depositAccountManagementServiceSpy).getProductInstance(tellerTransaction.getCustomerIdentifier());
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
@@ -246,15 +253,84 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(tellerTransaction.getCustomerAccountIdentifier());
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
-        .when(super.depositAccountManagementServiceSpy).getProductInstance(tellerTransaction.getCustomerIdentifier());
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
+
+  @Test(expected = TransactionProcessingException.class)
+  public void shouldNotWithdrawLackingBalance() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CASH_WITHDRAWAL);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(5000.00D);
+
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    super.testSubject.post(teller.getCode(), tellerTransaction);
+  }
+
+  @Test(expected = TransactionProcessingException.class)
+  public void shouldNotWithdrawExceedsCashDrawLimit() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CASH_WITHDRAWAL);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(15000.00D);
+
+    final Account account = new Account();
+    account.setBalance(20000.00D);
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    super.testSubject.post(teller.getCode(), tellerTransaction);
+  }
+
 
   private Teller prepareTeller() throws Exception {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
@@ -263,11 +339,11 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -296,11 +372,11 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> true)
         .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.accountingServiceSpy).accountExists(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
 
     super.testSubject.create(officeIdentifier, teller);
 

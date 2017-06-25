@@ -17,6 +17,7 @@ package io.mifos.teller.service.internal.service.helper;
 
 import io.mifos.accounting.api.v1.client.AccountNotFoundException;
 import io.mifos.accounting.api.v1.client.LedgerManager;
+import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.accounting.api.v1.domain.AccountCommand;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
 import io.mifos.accounting.api.v1.domain.JournalEntry;
@@ -26,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AccountingService {
@@ -41,13 +44,12 @@ public class AccountingService {
     this.ledgerManager = ledgerManager;
   }
 
-  public boolean accountExists(final String accountIdentifier) {
+  public Optional<Account> findAccount(final String accountIdentifier) {
     try {
-      this.ledgerManager.findAccount(accountIdentifier);
-      return true;
+      return Optional.of(this.ledgerManager.findAccount(accountIdentifier));
     } catch (final AccountNotFoundException anfex) {
       this.logger.warn("Account {} not found.", accountIdentifier);
-      return false;
+      return Optional.empty();
     }
   }
 

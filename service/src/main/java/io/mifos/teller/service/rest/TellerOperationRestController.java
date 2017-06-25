@@ -15,6 +15,7 @@
  */
 package io.mifos.teller.service.rest;
 
+import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.anubis.annotation.AcceptedTokenType;
 import io.mifos.anubis.annotation.Permittable;
 import io.mifos.core.api.util.UserContextHolder;
@@ -23,12 +24,12 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
 import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
-import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.service.internal.command.CancelTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.ConfirmTellerTransactionCommand;
+import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.InitializeTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.PauseTellerCommand;
 import io.mifos.teller.service.internal.service.TellerManagementService;
@@ -155,12 +156,33 @@ public class TellerOperationRestController {
       throw ServiceException.conflict("Teller {0} ist not active.", tellerCode);
     }
 
-    if (!this.accountingService.accountExists(tellerTransaction.getCustomerAccountIdentifier())) {
+    final String transactionType = tellerTransaction.getTransactionType();
+
+    if (transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
+        || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
+      if (tellerTransaction.getAmount() > teller.getCashdrawLimit()) {
+        throw ServiceException.conflict("Amount exceeds cash drawl limit.");
+      }
+    }
+
+    final Optional<Account> optionalCustomerAccount =
+        this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    if (!optionalCustomerAccount.isPresent()) {
       throw ServiceException.badRequest("Customer account {0} not found.");
+    } else {
+      if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
+          || transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
+          || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
+
+        final Account customerAccount = optionalCustomerAccount.get();
+        if (customerAccount.getBalance() < tellerTransaction.getAmount()) {
+          throw ServiceException.conflict("Not enough balance.");
+        }
+      }
     }
 
     if (tellerTransaction.getTargetAccountIdentifier() != null &&
-        !this.accountingService.accountExists(tellerTransaction.getTargetAccountIdentifier())) {
+        !this.accountingService.findAccount(tellerTransaction.getTargetAccountIdentifier()).isPresent()) {
       throw ServiceException.badRequest("Target account {0} not found.");
     }
 
