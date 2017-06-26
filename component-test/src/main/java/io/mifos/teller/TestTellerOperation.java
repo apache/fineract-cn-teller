@@ -44,7 +44,7 @@ public class TestTellerOperation extends AbstractTellerTest {
   }
 
   @Test
-  public void shouldAuthenticate() throws Exception {
+  public void shouldUnlock() throws Exception {
     final Teller teller = this.prepareTeller();
 
     final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
@@ -56,7 +56,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
 
   @Test(expected = TellerNotFoundException.class)
-  public void shouldNotAuthenticateUserMismatch() throws Exception {
+  public void shouldNotUnlockUserMismatch() throws Exception {
     final Teller teller = this.prepareTeller();
 
     final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
@@ -67,7 +67,7 @@ public class TestTellerOperation extends AbstractTellerTest {
   }
 
   @Test(expected = TellerNotFoundException.class)
-  public void shouldNotAuthenticatePasswordMismatch() throws Exception {
+  public void shouldNotUnlockPasswordMismatch() throws Exception {
     final Teller teller = this.prepareTeller();
 
     final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();

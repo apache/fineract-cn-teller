@@ -128,7 +128,7 @@ public interface TellerManager {
       @ThrowsException(status = HttpStatus.BAD_REQUEST, exception = TellerNotFoundException.class),
       @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerNotFoundException.class)
   })
-  void unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
+  Teller unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
                     @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand);
 
   @RequestMapping(

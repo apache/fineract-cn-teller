@@ -83,7 +83,7 @@ public class TellerOperationRestController {
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   @ResponseBody
-  ResponseEntity<Void> unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
+  ResponseEntity<Teller> unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
                                     @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand) {
     final Teller teller = this.verifyTeller(tellerCode);
 
@@ -103,7 +103,7 @@ public class TellerOperationRestController {
 
       this.logger.debug("Drawer {0} unlocked", unlockedTeller);
 
-      return ResponseEntity.ok().build();
+      return ResponseEntity.ok(teller);
     } catch (final Exception e) {
       throw ServiceException.notFound("Teller {0} not found.", teller.getCode());
     }
