@@ -89,39 +89,28 @@ public class TellerTransactionProcessor {
       case ServiceConstants.TX_ACCOUNT_TRANSFER:
       case ServiceConstants.TX_CASH_DEPOSIT:
       case ServiceConstants.TX_CASH_WITHDRAWAL:
-        return this.depositAccountCosts(tellerTransaction);
+        return this.getDepositTransactionCosts(tellerTransaction);
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());
     }
   }
 
-  private TellerTransactionCosts depositAccountCosts(final TellerTransaction tellerTransaction) {
-    final List<Charge> charges = this.depositAccountManagementService.getCharges(tellerTransaction);
-
-    final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
-    tellerTransactionCosts.setCharges(charges);
-    tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
-    tellerTransactionCosts.setTotalAmount(tellerTransaction.getAmount() + charges.stream().mapToDouble(Charge::getAmount).sum());
-
-    return tellerTransactionCosts;
-  }
-
   private void processTransfer(final TellerTransaction tellerTransaction) {
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
 
-    final TellerTransactionCosts tellerTransactionCosts = this.depositAccountCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
-    final Debtor debtor = new Debtor();
-    debtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+    final Debtor customerDebtor = new Debtor();
+    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+    customerDebtor.setAmount(tellerTransaction.getAmount().toString());
+    debtors.add(customerDebtor);
+
     if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      debtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
-    } else {
-      debtor.setAmount(tellerTransaction.getAmount().toString());
+      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
     }
-    debtors.add(debtor);
 
     final HashSet<Creditor> creditors = new HashSet<>();
     journalEntry.setCreditors(creditors);
@@ -145,7 +134,7 @@ public class TellerTransactionProcessor {
 
     final TellerEntity tellerEntity = optionalTeller.get();
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.depositAccountCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
@@ -156,11 +145,7 @@ public class TellerTransactionProcessor {
     debtors.add(tellerDebtor);
 
     if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      final Double chargesTotal = tellerTransactionCosts.getTotalAmount() - tellerTransaction.getAmount();
-      final Debtor customerDebtor = new Debtor();
-      customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-      customerDebtor.setAmount(chargesTotal.toString());
-      debtors.add(customerDebtor);
+      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
     }
 
     final HashSet<Creditor> creditors = new HashSet<>();
@@ -185,19 +170,19 @@ public class TellerTransactionProcessor {
 
     final TellerEntity tellerEntity = optionalTeller.get();
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.depositAccountCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
     final Debtor customerDebtor = new Debtor();
     customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      customerDebtor.setAmount(tellerTransactionCosts.getTotalAmount().toString());
-    } else {
-      customerDebtor.setAmount(tellerTransaction.getAmount().toString());
-    }
+    customerDebtor.setAmount(tellerTransaction.getAmount().toString());
     debtors.add(customerDebtor);
+
+    if (!tellerTransactionCosts.getCharges().isEmpty()) {
+      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
+    }
 
     final HashSet<Creditor> creditors = new HashSet<>();
     journalEntry.setCreditors(creditors);
@@ -250,6 +235,34 @@ public class TellerTransactionProcessor {
     journalEntry.setClerk(UserContextHolder.checkedGetUser());
 
     return journalEntry;
+  }
+
+  private TellerTransactionCosts getDepositTransactionCosts(final TellerTransaction tellerTransaction) {
+    final List<Charge> charges = this.depositAccountManagementService.getCharges(tellerTransaction);
+
+    final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
+    tellerTransactionCosts.setCharges(charges);
+    tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
+    tellerTransactionCosts.setTotalAmount(
+        tellerTransaction.getAmount() + charges.stream().mapToDouble(Charge::getAmount).sum()
+    );
+
+    return tellerTransactionCosts;
+  }
+
+  private Debtor createChargesDebtor(final String accountIdentifier, final TellerTransactionCosts tellerTransactionCosts) {
+    final Debtor chargesDebtor = new Debtor();
+    chargesDebtor.setAccountNumber(accountIdentifier);
+    chargesDebtor.setAmount(
+        Double.valueOf(
+            tellerTransactionCosts.getCharges()
+                .stream()
+                .mapToDouble(Charge::getAmount)
+                .sum()
+        ).toString()
+    );
+
+    return chargesDebtor;
   }
 
   private Set<Creditor> createChargeCreditors(final TellerTransactionCosts tellerTransactionCosts) {
