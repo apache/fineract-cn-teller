@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DepositAccountManagementService {
@@ -63,7 +64,7 @@ public class DepositAccountManagementService {
     final HashMap<String, Action> mappedActions = new HashMap<>(actions.size());
     actions.forEach(action -> mappedActions.put(action.getIdentifier(), action));
 
-    final List<io.mifos.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
+    final Set<io.mifos.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
     productCharges.forEach(productCharge -> {
       final Action action = mappedActions.get(productCharge.getActionIdentifier());
       if (action != null
