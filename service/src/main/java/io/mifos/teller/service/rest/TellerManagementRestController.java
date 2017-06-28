@@ -166,10 +166,6 @@ public class TellerManagementRestController {
                             @RequestBody @Valid final TellerManagementCommand tellerManagementCommand) {
     final Teller teller = this.verifyTeller(tellerCode);
 
-    if (tellerManagementCommand.getAmount() != null && tellerManagementCommand.getAmount() > teller.getCashdrawLimit()) {
-      throw ServiceException.badRequest("Adjustment exceeds cashdraw limit.");
-    }
-
     final TellerManagementCommand.Action action = TellerManagementCommand.Action.valueOf(tellerManagementCommand.getAction());
     switch (action) {
       case OPEN:
@@ -215,6 +211,12 @@ public class TellerManagementRestController {
   }
 
   private void verifyEmployee(final String employeeIdentifier) {
+    final Optional<Teller> optionalTeller = this.tellerManagementService.findByAssignedEmployee(employeeIdentifier);
+    if (optionalTeller.isPresent()) {
+      throw ServiceException.conflict("Employee {0} already assigned to teller {1}.",
+          employeeIdentifier, optionalTeller.get().getCode());
+    }
+
     if (!this.organizationService.employeeExists(employeeIdentifier)) {
       throw ServiceException.badRequest("Employee {0} not found.", employeeIdentifier);
     }

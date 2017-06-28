@@ -27,4 +27,6 @@ public interface TellerRepository extends JpaRepository<TellerEntity, Long> {
   Optional<TellerEntity> findByIdentifier(final String identifier);
 
   List<TellerEntity> findByOfficeIdentifier(final String officeIdentifier);
+
+  Optional<TellerEntity> findFirstByAssignedEmployeeIdentifier(final String employeeIdentifier);
 }

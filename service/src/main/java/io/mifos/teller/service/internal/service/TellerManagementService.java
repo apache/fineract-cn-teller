@@ -106,4 +106,8 @@ public class TellerManagementService {
 
     return tellerEntries;
   }
+
+  public Optional<Teller> findByAssignedEmployee(final String employeeIdentifier) {
+    return this.tellerRepository.findFirstByAssignedEmployeeIdentifier(employeeIdentifier).map(TellerMapper::map);
+  }
 }
