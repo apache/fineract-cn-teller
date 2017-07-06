@@ -169,7 +169,8 @@ public interface TellerManager {
   })
   void confirm(@PathVariable("tellerCode") final String tellerCode,
                @PathVariable("identifier") final String tellerTransactionIdentifier,
-               @RequestParam(value = "command", required = true) final String command);
+               @RequestParam(value = "command", required = true) final String command,
+               @RequestParam(value = "charges", required = false, defaultValue = "excluded") final String charges);
 
   @RequestMapping(
       value = "/teller/{tellerCode}/transactions",

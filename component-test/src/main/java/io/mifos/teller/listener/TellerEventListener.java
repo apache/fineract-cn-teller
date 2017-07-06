@@ -103,4 +103,15 @@ public class TellerEventListener {
     this.logger.debug("Teller {} created.", payload);
     this.eventRecorder.event(tenant, EventConstants.PAUSE_TELLER, payload, String.class);
   }
+
+  @JmsListener(
+      destination = EventConstants.DESTINATION,
+      selector = EventConstants.SELECTOR_CONFIRM_TRANSACTION,
+      subscription = EventConstants.DESTINATION
+  )
+  public void confirmTransaction(@Header(TenantHeaderFilter.TENANT_HEADER) final String tenant,
+                      final String payload) {
+    this.logger.debug("Teller {} created.", payload);
+    this.eventRecorder.event(tenant, EventConstants.CONFIRM_TRANSACTION, payload, String.class);
+  }
 }

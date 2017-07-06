@@ -16,14 +16,19 @@
 package io.mifos.teller;
 
 import io.mifos.accounting.api.v1.domain.Account;
+import io.mifos.core.api.context.AutoUserContext;
 import io.mifos.core.lang.DateConverter;
+import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
+import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
+import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
 import io.mifos.teller.api.v1.client.TellerValidationException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -38,6 +43,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 public class TestTellerOperation extends AbstractTellerTest {
+
+  private static Teller tellerUnderTest = null;
 
   public TestTellerOperation() {
     super();
@@ -92,13 +99,6 @@ public class TestTellerOperation extends AbstractTellerTest {
     super.testSubject.post(teller.getCode(), "PAUSE");
 
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.PAUSE_TELLER, teller.getCode()));
-  }
-
-  @Test(expected = TellerValidationException.class)
-  public void shouldNotPauseTellerNotAuthenticated() throws Exception {
-    final Teller teller = this.prepareTeller();
-
-    super.testSubject.post(teller.getCode(), "PAUSE");
   }
 
   @Test
@@ -331,37 +331,49 @@ public class TestTellerOperation extends AbstractTellerTest {
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
 
-
   private Teller prepareTeller() throws Exception {
-    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
-    final Teller teller = TellerGenerator.createRandomTeller();
+    if (TestTellerOperation.tellerUnderTest == null) {
+      final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+      TestTellerOperation.tellerUnderTest = TellerGenerator.createRandomTeller();
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+      Mockito.doAnswer(invocation -> true)
+          .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
 
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
-        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(TestTellerOperation.tellerUnderTest.getTellerAccountIdentifier()));
 
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
-        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(TestTellerOperation.tellerUnderTest.getVaultAccountIdentifier()));
 
-    super.testSubject.create(officeIdentifier, teller);
+      super.testSubject.create(officeIdentifier, TestTellerOperation.tellerUnderTest);
 
-    Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
+      Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, TestTellerOperation.tellerUnderTest.getCode()));
 
-    final TellerManagementCommand command = new TellerManagementCommand();
-    command.setAction(TellerManagementCommand.Action.OPEN.name());
-    command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
-    command.setAssignedEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+      final TellerManagementCommand command = new TellerManagementCommand();
+      command.setAction(TellerManagementCommand.Action.OPEN.name());
+      command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
+      command.setAssignedEmployeeIdentifier(AbstractTellerTest.TEST_USER);
 
-    Mockito.doAnswer(invocation -> true)
-        .when(super.organizationServiceSpy).employeeExists(Matchers.eq(command.getAssignedEmployeeIdentifier()));
+      Mockito.doAnswer(invocation -> true)
+          .when(super.organizationServiceSpy).employeeExists(Matchers.eq(command.getAssignedEmployeeIdentifier()));
 
-    super.testSubject.post(officeIdentifier, teller.getCode(), command);
+      super.testSubject.post(officeIdentifier, TestTellerOperation.tellerUnderTest.getCode(), command);
 
-    Assert.assertTrue(super.eventRecorder.wait(EventConstants.OPEN_TELLER, teller.getCode()));
+      Assert.assertTrue(super.eventRecorder.wait(EventConstants.OPEN_TELLER, TestTellerOperation.tellerUnderTest.getCode()));
+    }
 
-    return teller;
+    final ProductInstance productInstance = new ProductInstance();
+    productInstance.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    productInstance.setBalance(0.00D);
+    Mockito.doAnswer(invocation -> productInstance)
+        .when(super.depositAccountManagementServiceSpy).findProductInstance(Matchers.anyString());
+
+    final ProductDefinition productDefinition = new ProductDefinition();
+    productDefinition.setMinimumBalance(0.00D);
+    Mockito.doAnswer(invocation -> productDefinition)
+        .when(super.depositAccountManagementServiceSpy).findProductDefinition(Matchers.eq(productInstance.getProductIdentifier()));
+
+    return TestTellerOperation.tellerUnderTest;
   }
 
   @Test(expected = TellerNotFoundException.class)
@@ -387,5 +399,68 @@ public class TestTellerOperation extends AbstractTellerTest {
     unlockDrawerCommand.setPassword(teller.getPassword());
 
     super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+  }
+
+  @Test(expected = TellerTransactionValidationException.class)
+  public void shouldNotReopenAccountClosed() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction openAccountTransaction =  new TellerTransaction();
+    openAccountTransaction.setTransactionType(ServiceConstants.TX_OPEN_ACCOUNT);
+    openAccountTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    openAccountTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    openAccountTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    openAccountTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    openAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    openAccountTransaction.setAmount(1234.56D);
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(openAccountTransaction));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(openAccountTransaction.getCustomerIdentifier());
+
+    final TellerTransactionCosts openingCosts = super.testSubject.post(teller.getCode(), openAccountTransaction);
+    super.testSubject.confirm(teller.getCode(), openingCosts.getTellerTransactionIdentifier(), "CONFIRM", "excluded");
+    super.eventRecorder.wait(EventConstants.CONFIRM_TRANSACTION, openingCosts.getTellerTransactionIdentifier());
+
+    final TellerTransaction closeAccountTransaction =  new TellerTransaction();
+    closeAccountTransaction.setTransactionType(ServiceConstants.TX_CLOSE_ACCOUNT);
+    closeAccountTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    closeAccountTransaction.setProductIdentifier(openAccountTransaction.getProductIdentifier());
+    closeAccountTransaction.setCustomerAccountIdentifier(openAccountTransaction.getCustomerAccountIdentifier());
+    closeAccountTransaction.setCustomerIdentifier(openAccountTransaction.getCustomerIdentifier());
+    closeAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    closeAccountTransaction.setAmount(1234.56D);
+
+    final Account account = new Account();
+    account.setBalance(1234.56D);
+
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
+
+    final TellerTransactionCosts closingCosts = super.testSubject.post(teller.getCode(), closeAccountTransaction);
+    super.testSubject.confirm(teller.getCode(), closingCosts.getTellerTransactionIdentifier(), "CONFIRM", "excluded");
+    super.eventRecorder.wait(EventConstants.CONFIRM_TRANSACTION, closingCosts.getTellerTransactionIdentifier());
+
+    final TellerTransaction reopenAccountTransaction =  new TellerTransaction();
+    reopenAccountTransaction.setTransactionType(ServiceConstants.TX_OPEN_ACCOUNT);
+    reopenAccountTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    reopenAccountTransaction.setProductIdentifier(openAccountTransaction.getProductIdentifier());
+    reopenAccountTransaction.setCustomerAccountIdentifier(openAccountTransaction.getCustomerAccountIdentifier());
+    reopenAccountTransaction.setCustomerIdentifier(openAccountTransaction.getCustomerIdentifier());
+    reopenAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    reopenAccountTransaction.setAmount(1234.56D);
+
+    super.testSubject.post(teller.getCode(), reopenAccountTransaction);
   }
 }

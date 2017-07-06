@@ -84,7 +84,7 @@ public class TellerOperationRestController {
   )
   @ResponseBody
   ResponseEntity<Teller> unlockDrawer(@PathVariable("tellerCode") final String tellerCode,
-                                    @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand) {
+                                      @RequestBody @Valid final UnlockDrawerCommand unlockDrawerCommand) {
     final Teller teller = this.verifyTeller(tellerCode);
 
     if (teller.getState().equals(Teller.State.CLOSED.name())) {
@@ -170,11 +170,17 @@ public class TellerOperationRestController {
     if (!optionalCustomerAccount.isPresent()) {
       throw ServiceException.badRequest("Customer account {0} not found.");
     } else {
+      final Account customerAccount = optionalCustomerAccount.get();
+
+      if (!customerAccount.getState().equals(Account.State.OPEN)) {
+        throw ServiceException.conflict("Account {0} is not open.", customerAccount.getIdentifier());
+      }
+
       if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
           || transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
           || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
 
-        final Account customerAccount = optionalCustomerAccount.get();
+
         if (customerAccount.getBalance() < tellerTransaction.getAmount()) {
           throw ServiceException.conflict("Not enough balance.");
         }
@@ -206,7 +212,8 @@ public class TellerOperationRestController {
   @ResponseBody
   ResponseEntity<Void> confirm(@PathVariable("tellerCode") final String tellerCode,
                                @PathVariable("identifier") final String tellerTransactionIdentifier,
-                               @RequestParam(value = "command", required = true) final String command) {
+                               @RequestParam(value = "command", required = true) final String command,
+                               @RequestParam(value = "charges", required = false, defaultValue = "excluded") final String charges) {
     final Teller teller = this.verifyTeller(tellerCode);
 
     this.verifyEmployee(teller);
@@ -217,7 +224,7 @@ public class TellerOperationRestController {
 
     switch (command.toUpperCase()) {
       case "CONFIRM" :
-        this.commandGateway.process(new ConfirmTellerTransactionCommand(tellerTransactionIdentifier));
+        this.commandGateway.process(new ConfirmTellerTransactionCommand(tellerTransactionIdentifier, charges));
         break;
       case "CANCEL" :
         this.commandGateway.process(new CancelTellerTransactionCommand(tellerTransactionIdentifier));

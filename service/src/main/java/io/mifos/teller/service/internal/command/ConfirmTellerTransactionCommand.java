@@ -17,13 +17,19 @@ package io.mifos.teller.service.internal.command;
 
 public class ConfirmTellerTransactionCommand {
   private final String tellerTransactionIdentifier;
+  private final boolean chargesIncluded;
 
-  public ConfirmTellerTransactionCommand(final String tellerTransactionIdentifier) {
+  public ConfirmTellerTransactionCommand(final String tellerTransactionIdentifier, final String charges) {
     super();
     this.tellerTransactionIdentifier = tellerTransactionIdentifier;
+    this.chargesIncluded = charges.equalsIgnoreCase("included");
   }
 
   public String tellerTransactionIdentifier() {
     return this.tellerTransactionIdentifier;
+  }
+
+  public boolean chargesIncluded() {
+    return this.chargesIncluded;
   }
 }

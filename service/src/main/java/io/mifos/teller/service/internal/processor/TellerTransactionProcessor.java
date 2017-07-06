@@ -15,67 +15,44 @@
  */
 package io.mifos.teller.service.internal.processor;
 
-import io.mifos.accounting.api.v1.domain.Creditor;
-import io.mifos.accounting.api.v1.domain.Debtor;
-import io.mifos.accounting.api.v1.domain.JournalEntry;
-import io.mifos.core.api.util.UserContextHolder;
-import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
-import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.ServiceConstants;
-import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
-import io.mifos.teller.service.internal.repository.TellerEntity;
-import io.mifos.teller.service.internal.repository.TellerRepository;
-import io.mifos.teller.service.internal.service.helper.AccountingService;
-import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 @Component
 public class TellerTransactionProcessor {
 
   private final Logger logger;
-  private final AccountingService accountingService;
-  private final DepositAccountManagementService depositAccountManagementService;
-  private final TellerRepository tellerRepository;
+  private final DepositTransactionHandler depositTransactionHandler;
 
   @Autowired
   public TellerTransactionProcessor(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                    final AccountingService accountingService,
-                                    final DepositAccountManagementService depositAccountManagementService,
-                                    final TellerRepository tellerRepository) {
+                                    final DepositTransactionHandler depositTransactionHandler) {
     super();
     this.logger = logger;
-    this.accountingService = accountingService;
-    this.depositAccountManagementService = depositAccountManagementService;
-    this.tellerRepository = tellerRepository;
+    this.depositTransactionHandler = depositTransactionHandler;
   }
 
-  public void process(final String tellerCode, final TellerTransaction tellerTransaction) {
+  public void process(final String tellerCode, final TellerTransaction tellerTransaction, final Boolean chargesIncluded) {
     switch (tellerTransaction.getTransactionType()) {
       case ServiceConstants.TX_OPEN_ACCOUNT:
-        this.processDepositAccountOpening(tellerCode, tellerTransaction);
+        this.depositTransactionHandler.processDepositAccountOpening(tellerCode, tellerTransaction, chargesIncluded);
         break;
       case ServiceConstants.TX_CLOSE_ACCOUNT:
-        this.processDepositAccountClosing(tellerCode, tellerTransaction);
+        this.depositTransactionHandler.processDepositAccountClosing(tellerCode, tellerTransaction, chargesIncluded);
         break;
       case ServiceConstants.TX_ACCOUNT_TRANSFER:
-        this.processTransfer(tellerTransaction);
+        this.depositTransactionHandler.processTransfer(tellerCode, tellerTransaction, chargesIncluded);
         break;
       case ServiceConstants.TX_CASH_DEPOSIT:
-        this.processCashDeposit(tellerCode, tellerTransaction);
+        this.depositTransactionHandler.processCashDeposit(tellerCode, tellerTransaction, chargesIncluded);
         break;
       case ServiceConstants.TX_CASH_WITHDRAWAL:
-        this.processCashWithdrawal(tellerCode, tellerTransaction);
+        this.depositTransactionHandler.processCashWithdrawal(tellerCode, tellerTransaction, chargesIncluded);
         break;
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());
@@ -89,191 +66,10 @@ public class TellerTransactionProcessor {
       case ServiceConstants.TX_ACCOUNT_TRANSFER:
       case ServiceConstants.TX_CASH_DEPOSIT:
       case ServiceConstants.TX_CASH_WITHDRAWAL:
-        return this.getDepositTransactionCosts(tellerTransaction);
+        return this.depositTransactionHandler.getDepositTransactionCosts(tellerTransaction);
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());
     }
   }
 
-  private void processTransfer(final TellerTransaction tellerTransaction) {
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
-
-    final HashSet<Debtor> debtors = new HashSet<>();
-    journalEntry.setDebtors(debtors);
-
-    final Debtor customerDebtor = new Debtor();
-    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerDebtor.setAmount(tellerTransaction.getAmount().toString());
-    debtors.add(customerDebtor);
-
-    if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
-    }
-
-    final HashSet<Creditor> creditors = new HashSet<>();
-    journalEntry.setCreditors(creditors);
-
-    final Creditor targetCreditor = new Creditor();
-    targetCreditor.setAccountNumber(tellerTransaction.getTargetAccountIdentifier());
-    targetCreditor.setAmount(tellerTransaction.getAmount().toString());
-    creditors.add(targetCreditor);
-
-    creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
-
-    this.accountingService.postJournalEntry(journalEntry);
-  }
-
-  private void processCashDeposit(final String tellerCode, final TellerTransaction tellerTransaction) {
-    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
-    if (!optionalTeller.isPresent()) {
-      this.logger.warn("Teller {} not found.", tellerCode);
-      throw new IllegalStateException("Teller not found.");
-    }
-
-    final TellerEntity tellerEntity = optionalTeller.get();
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
-
-    final HashSet<Debtor> debtors = new HashSet<>();
-    journalEntry.setDebtors(debtors);
-
-    final Debtor tellerDebtor = new Debtor();
-    tellerDebtor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
-    tellerDebtor.setAmount(tellerTransaction.getAmount().toString());
-    debtors.add(tellerDebtor);
-
-    if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
-    }
-
-    final HashSet<Creditor> creditors = new HashSet<>();
-    journalEntry.setCreditors(creditors);
-
-    final Creditor customerCreditor = new Creditor();
-    customerCreditor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerCreditor.setAmount(tellerTransaction.getAmount().toString());
-    creditors.add(customerCreditor);
-
-    creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
-
-    this.accountingService.postJournalEntry(journalEntry);
-  }
-
-  private void processCashWithdrawal(final String tellerCode, final TellerTransaction tellerTransaction) {
-    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
-    if (!optionalTeller.isPresent()) {
-      this.logger.warn("Teller {} not found.", tellerCode);
-      throw new IllegalStateException("Teller not found.");
-    }
-
-    final TellerEntity tellerEntity = optionalTeller.get();
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
-
-    final HashSet<Debtor> debtors = new HashSet<>();
-    journalEntry.setDebtors(debtors);
-
-    final Debtor customerDebtor = new Debtor();
-    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerDebtor.setAmount(tellerTransaction.getAmount().toString());
-    debtors.add(customerDebtor);
-
-    if (!tellerTransactionCosts.getCharges().isEmpty()) {
-      debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
-    }
-
-    final HashSet<Creditor> creditors = new HashSet<>();
-    journalEntry.setCreditors(creditors);
-
-    final Creditor tellerCreditor = new Creditor();
-    tellerCreditor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
-    tellerCreditor.setAmount(tellerTransaction.getAmount().toString());
-    creditors.add(tellerCreditor);
-
-    creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
-
-    this.accountingService.postJournalEntry(journalEntry);
-  }
-
-  private void processDepositAccountClosing(final String tellerCode, final TellerTransaction tellerTransaction) {
-    final List<ProductInstance> productInstances =
-        this.depositAccountManagementService.fetchProductInstances(tellerTransaction.getCustomerIdentifier());
-
-    this.processCashWithdrawal(tellerCode, tellerTransaction);
-
-    productInstances.forEach(productInstance -> {
-      if (productInstance.getAccountIdentifier().equals(tellerTransaction.getCustomerAccountIdentifier())) {
-        this.depositAccountManagementService.closeProductInstance(tellerTransaction.getCustomerAccountIdentifier());
-        this.accountingService.closeAccount(tellerTransaction.getCustomerAccountIdentifier());
-      }
-    });
-  }
-
-  private void processDepositAccountOpening(final String tellerCode, final TellerTransaction tellerTransaction) {
-    final ProductInstance productInstances =
-        this.depositAccountManagementService.findProductInstance(tellerTransaction.getCustomerAccountIdentifier());
-
-    final ProductDefinition productDefinition =
-        this.depositAccountManagementService.findProductDefinition(productInstances.getProductIdentifier());
-
-    this.processCashDeposit(tellerCode, tellerTransaction);
-
-    if ((tellerTransaction.getAmount() + productInstances.getBalance()) >= productDefinition.getMinimumBalance()) {
-      this.depositAccountManagementService.activateProductInstance(tellerTransaction.getCustomerAccountIdentifier());
-      this.accountingService.openAccount(tellerTransaction.getCustomerAccountIdentifier());
-    }
-  }
-
-  private JournalEntry prepareJournalEntry(final TellerTransaction tellerTransaction) {
-    final JournalEntry journalEntry = new JournalEntry();
-    journalEntry.setTransactionIdentifier(tellerTransaction.getIdentifier());
-    journalEntry.setTransactionDate(tellerTransaction.getTransactionDate());
-    journalEntry.setTransactionType(tellerTransaction.getTransactionType());
-    journalEntry.setMessage(tellerTransaction.getTransactionType());
-    journalEntry.setClerk(UserContextHolder.checkedGetUser());
-
-    return journalEntry;
-  }
-
-  private TellerTransactionCosts getDepositTransactionCosts(final TellerTransaction tellerTransaction) {
-    final List<Charge> charges = this.depositAccountManagementService.getCharges(tellerTransaction);
-
-    final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
-    tellerTransactionCosts.setCharges(charges);
-    tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
-    tellerTransactionCosts.setTotalAmount(
-        tellerTransaction.getAmount() + charges.stream().mapToDouble(Charge::getAmount).sum()
-    );
-
-    return tellerTransactionCosts;
-  }
-
-  private Debtor createChargesDebtor(final String accountIdentifier, final TellerTransactionCosts tellerTransactionCosts) {
-    final Debtor chargesDebtor = new Debtor();
-    chargesDebtor.setAccountNumber(accountIdentifier);
-    chargesDebtor.setAmount(
-        Double.valueOf(
-            tellerTransactionCosts.getCharges()
-                .stream()
-                .mapToDouble(Charge::getAmount)
-                .sum()
-        ).toString()
-    );
-
-    return chargesDebtor;
-  }
-
-  private Set<Creditor> createChargeCreditors(final TellerTransactionCosts tellerTransactionCosts) {
-    return tellerTransactionCosts.getCharges()
-        .stream()
-        .map(charge -> {
-          final Creditor chargeCreditor = new Creditor();
-          chargeCreditor.setAccountNumber(charge.getIncomeAccountIdentifier());
-          chargeCreditor.setAmount(charge.getAmount().toString());
-          return chargeCreditor;
-        })
-        .collect(Collectors.toSet());
-  }
 }

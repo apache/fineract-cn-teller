@@ -91,7 +91,8 @@ public class TellerTransactionAggregate {
       final TellerTransactionEntity tellerTransactionEntity = optionalTellerTransaction.get();
 
       this.tellerTransactionProcessor.process(tellerTransactionEntity.getTeller().getIdentifier(),
-          TellerTransactionMapper.map(tellerTransactionEntity));
+          TellerTransactionMapper.map(tellerTransactionEntity),
+          confirmTellerTransactionCommand.chargesIncluded());
 
       tellerTransactionEntity.setState(TellerTransaction.State.CONFIRMED.name());
       this.tellerTransactionRepository.save(tellerTransactionEntity);
