@@ -172,7 +172,7 @@ public class TellerOperationRestController {
     } else {
       final Account customerAccount = optionalCustomerAccount.get();
 
-      if (!customerAccount.getState().equals(Account.State.OPEN)) {
+      if (!customerAccount.getState().equals(Account.State.OPEN.name())) {
         throw ServiceException.conflict("Account {0} is not open.", customerAccount.getIdentifier());
       }
 
