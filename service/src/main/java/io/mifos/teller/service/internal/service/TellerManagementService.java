@@ -17,7 +17,6 @@ package io.mifos.teller.service.internal.service;
 
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
 import io.mifos.core.lang.DateConverter;
-import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerEntry;
@@ -26,12 +25,11 @@ import io.mifos.teller.service.internal.mapper.TellerMapper;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -42,16 +40,13 @@ import java.util.stream.Collectors;
 @Service
 public class TellerManagementService {
 
-  private final Logger logger;
   private final TellerRepository tellerRepository;
   private final AccountingService accountingService;
 
   @Autowired
-  public TellerManagementService(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                 final TellerRepository tellerRepository,
+  public TellerManagementService(final TellerRepository tellerRepository,
                                  final AccountingService accountingService) {
     super();
-    this.logger = logger;
     this.tellerRepository = tellerRepository;
     this.accountingService = accountingService;
   }
@@ -76,8 +71,8 @@ public class TellerManagementService {
       final String accountIdentifier = tellerEntity.getTellerAccountIdentifier();
       final LocalDateTime lastModifiedOn =
           tellerEntity.getLastModifiedOn() != null ? tellerEntity.getLastModifiedOn() : LocalDateTime.now(Clock.systemUTC());
-      final LocalDateTime startDate = lastModifiedOn.withHour(0).withMinute(0).withSecond(0).withNano(0);
-      final LocalDateTime endDate = lastModifiedOn.withHour(23).withMinute(59).withSecond(59).withNano(999);
+      final LocalDate startDate = lastModifiedOn.toLocalDate();
+      final LocalDate endDate = lastModifiedOn.toLocalDate();
       final String dateRange =
           DateConverter.toIsoString(startDate) + ".." + DateConverter.toIsoString(endDate);
 
