@@ -55,7 +55,7 @@ public class AccountingService {
 
   public AccountEntryPage fetchAccountEntries(final String accountIdentifier, final String dateRange, final Integer pageIndex,
                                               final Integer pageSize) {
-    return this.ledgerManager.fetchAccountEntries(accountIdentifier, dateRange, pageIndex, pageSize, "identifier",
+    return this.ledgerManager.fetchAccountEntries(accountIdentifier, dateRange, null, pageIndex, pageSize, "identifier",
         Sort.Direction.DESC.name());
   }
 

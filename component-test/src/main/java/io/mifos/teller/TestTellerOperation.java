@@ -16,20 +16,14 @@
 package io.mifos.teller;
 
 import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.core.api.context.AutoUserContext;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
-import io.mifos.teller.api.v1.client.TellerValidationException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
-import io.mifos.teller.api.v1.domain.Teller;
-import io.mifos.teller.api.v1.domain.TellerManagementCommand;
-import io.mifos.teller.api.v1.domain.TellerTransaction;
-import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
-import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
+import io.mifos.teller.api.v1.domain.*;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
@@ -122,7 +116,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+    final Account account = new Account();
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
@@ -155,6 +151,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
@@ -189,6 +186,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
@@ -222,7 +220,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+    final Account account = new Account();
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
@@ -255,6 +255,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
@@ -288,6 +289,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
@@ -422,7 +424,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     openAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
     openAccountTransaction.setAmount(1234.56D);
 
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+    final Account accountA = new Account();
+    accountA.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(accountA))
         .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(openAccountTransaction));
@@ -444,6 +448,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setBalance(1234.56D);
+    account.setState(Account.State.CLOSED.name());
 
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
