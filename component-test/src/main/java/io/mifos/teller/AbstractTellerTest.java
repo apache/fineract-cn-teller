@@ -18,10 +18,7 @@ package io.mifos.teller;
 import io.mifos.anubis.test.v1.TenantApplicationSecurityEnvironmentTestRule;
 import io.mifos.core.api.context.AutoUserContext;
 import io.mifos.core.lang.ApplicationName;
-import io.mifos.core.test.env.TestEnvironment;
 import io.mifos.core.test.fixture.TenantDataStoreContextTestRule;
-import io.mifos.core.test.fixture.cassandra.CassandraInitializer;
-import io.mifos.core.test.fixture.mariadb.MariaDBInitializer;
 import io.mifos.core.test.listener.EnableEventRecording;
 import io.mifos.core.test.listener.EventRecorder;
 import io.mifos.teller.api.v1.EventConstants;
@@ -34,8 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.rules.RuleChain;
-import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +53,8 @@ import java.security.interfaces.RSAPrivateKey;
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     classes = {AbstractTellerTest.TestConfiguration.class}
 )
-public class AbstractTellerTest {
+public class AbstractTellerTest extends SuiteTestEnvironment {
 
-  private static final String APP_NAME = "teller-v1";
   public static final String LOGGER_NAME = "test-logger";
 
   @Configuration
@@ -82,17 +76,8 @@ public class AbstractTellerTest {
 
   static final String TEST_USER = "homer";
 
-  private final static TestEnvironment testEnvironment = new TestEnvironment(APP_NAME);
-  private final static CassandraInitializer cassandraInitializer = new CassandraInitializer();
-  private final static MariaDBInitializer mariaDBInitializer = new MariaDBInitializer();
-  final static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, mariaDBInitializer);
-
   @ClassRule
-  public static TestRule orderClassRules = RuleChain
-      .outerRule(testEnvironment)
-      .around(cassandraInitializer)
-      .around(mariaDBInitializer)
-      .around(tenantDataStoreContext);
+  public static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, mariaDBInitializer);
 
   @Rule
   public final TenantApplicationSecurityEnvironmentTestRule tenantApplicationSecurityEnvironment
@@ -121,6 +106,7 @@ public class AbstractTellerTest {
   @Autowired
   private ApplicationName applicationName;
 
+  @SuppressWarnings("WeakerAccess")
   @Autowired
   @Qualifier(LOGGER_NAME)
   Logger logger;
