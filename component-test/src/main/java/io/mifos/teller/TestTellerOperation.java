@@ -403,7 +403,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
   }
 
-  @Test(expected = TellerTransactionValidationException.class)
+  @Test(expected = TransactionProcessingException.class)
   public void shouldNotReopenAccountClosed() throws Exception {
     final Teller teller = this.prepareTeller();
 
@@ -424,9 +424,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     openAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
     openAccountTransaction.setAmount(1234.56D);
 
-    final Account accountA = new Account();
-    accountA.setState(Account.State.OPEN.name());
-    Mockito.doAnswer(invocation -> Optional.of(accountA))
+    final Account account = new Account();
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(openAccountTransaction));
@@ -446,16 +446,13 @@ public class TestTellerOperation extends AbstractTellerTest {
     closeAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
     closeAccountTransaction.setAmount(1234.56D);
 
-    final Account account = new Account();
     account.setBalance(1234.56D);
-    account.setState(Account.State.CLOSED.name());
-
-    Mockito.doAnswer(invocation -> Optional.of(account))
-        .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
 
     final TellerTransactionCosts closingCosts = super.testSubject.post(teller.getCode(), closeAccountTransaction);
     super.testSubject.confirm(teller.getCode(), closingCosts.getTellerTransactionIdentifier(), "CONFIRM", "excluded");
     super.eventRecorder.wait(EventConstants.CONFIRM_TRANSACTION, closingCosts.getTellerTransactionIdentifier());
+
+    account.setState(Account.State.CLOSED.name());
 
     final TellerTransaction reopenAccountTransaction =  new TellerTransaction();
     reopenAccountTransaction.setTransactionType(ServiceConstants.TX_OPEN_ACCOUNT);
