@@ -60,7 +60,7 @@ public class DepositTransactionHandler {
     this.tellerRepository = tellerRepository;
   }
 
-  public TellerTransactionCosts getDepositTransactionCosts(final TellerTransaction tellerTransaction) {
+  public TellerTransactionCosts getTellerTransactionCosts(final TellerTransaction tellerTransaction) {
     final List<Charge> charges = this.depositAccountManagementService.getCharges(tellerTransaction);
 
     final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
@@ -74,11 +74,11 @@ public class DepositTransactionHandler {
   }
 
   public void processTransfer(final String tellerCode, final TellerTransaction tellerTransaction,
-                               final boolean chargesIncluded) {
+                              final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
 
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
@@ -112,7 +112,7 @@ public class DepositTransactionHandler {
   public void processCashDeposit(final String tellerCode, final TellerTransaction tellerTransaction, final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
@@ -146,7 +146,7 @@ public class DepositTransactionHandler {
                                     final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-    final TellerTransactionCosts tellerTransactionCosts = this.getDepositTransactionCosts(tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);

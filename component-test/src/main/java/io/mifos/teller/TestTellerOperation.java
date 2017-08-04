@@ -21,9 +21,12 @@ import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
-import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
-import io.mifos.teller.api.v1.domain.*;
+import io.mifos.teller.api.v1.domain.Teller;
+import io.mifos.teller.api.v1.domain.TellerManagementCommand;
+import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
+import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
@@ -464,5 +467,37 @@ public class TestTellerOperation extends AbstractTellerTest {
     reopenAccountTransaction.setAmount(1234.56D);
 
     super.testSubject.post(teller.getCode(), reopenAccountTransaction);
+  }
+
+  @Test
+  public void shouldProcessRepayment() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction repaymentTransaction =  new TellerTransaction();
+    repaymentTransaction.setTransactionType(ServiceConstants.TX_REPAYMENT);
+    repaymentTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    repaymentTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    repaymentTransaction.setProductCaseIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    repaymentTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    repaymentTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    repaymentTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    repaymentTransaction.setAmount(246.80D);
+
+    final Account account = new Account();
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(repaymentTransaction.getCustomerAccountIdentifier());
+
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), repaymentTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", null);
   }
 }

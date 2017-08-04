@@ -28,13 +28,16 @@ public class TellerTransactionProcessor {
 
   private final Logger logger;
   private final DepositTransactionHandler depositTransactionHandler;
+  private final PortfolioTransactionHandler portfolioTransactionHandler;
 
   @Autowired
   public TellerTransactionProcessor(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
-                                    final DepositTransactionHandler depositTransactionHandler) {
+                                    final DepositTransactionHandler depositTransactionHandler,
+                                    final PortfolioTransactionHandler portfolioTransactionHandler) {
     super();
     this.logger = logger;
     this.depositTransactionHandler = depositTransactionHandler;
+    this.portfolioTransactionHandler = portfolioTransactionHandler;
   }
 
   public void process(final String tellerCode, final TellerTransaction tellerTransaction, final Boolean chargesIncluded) {
@@ -54,6 +57,9 @@ public class TellerTransactionProcessor {
       case ServiceConstants.TX_CASH_WITHDRAWAL:
         this.depositTransactionHandler.processCashWithdrawal(tellerCode, tellerTransaction, chargesIncluded);
         break;
+      case ServiceConstants.TX_REPAYMENT:
+        this.portfolioTransactionHandler.processRepayment(tellerCode, tellerTransaction);
+        break;
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());
     }
@@ -66,7 +72,9 @@ public class TellerTransactionProcessor {
       case ServiceConstants.TX_ACCOUNT_TRANSFER:
       case ServiceConstants.TX_CASH_DEPOSIT:
       case ServiceConstants.TX_CASH_WITHDRAWAL:
-        return this.depositTransactionHandler.getDepositTransactionCosts(tellerTransaction);
+        return this.depositTransactionHandler.getTellerTransactionCosts(tellerTransaction);
+      case ServiceConstants.TX_REPAYMENT:
+        return this.portfolioTransactionHandler.getTellerTransactionCosts(tellerTransaction);
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());
     }
