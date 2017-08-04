@@ -15,8 +15,11 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
+import io.mifos.core.api.util.NotFoundException;
+import io.mifos.core.lang.ServiceException;
 import io.mifos.individuallending.api.v1.domain.product.AccountDesignators;
 import io.mifos.individuallending.api.v1.domain.workflow.Action;
+import io.mifos.office.api.v1.client.BadRequestException;
 import io.mifos.portfolio.api.v1.client.PortfolioManager;
 import io.mifos.portfolio.api.v1.domain.AccountAssignment;
 import io.mifos.portfolio.api.v1.domain.ChargeDefinition;
@@ -52,35 +55,47 @@ public class PortfolioService {
 
     final List<Charge> charges =  new ArrayList<>();
 
-    final List<CostComponent> costComponentsForAction =
-        this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
+    try {
+      final List<CostComponent> costComponentsForAction =
+          this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
 
-    costComponentsForAction.forEach(costComponent -> {
-      final ChargeDefinition chargeDefinition =
-          this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
+      costComponentsForAction.forEach(costComponent -> {
+        final ChargeDefinition chargeDefinition =
+            this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
 
-      final Charge charge = new Charge();
-      charge.setCode(chargeDefinition.getIdentifier());
-      charge.setName(chargeDefinition.getName());
-      charge.setAmount(costComponent.getAmount().doubleValue());
-      charges.add(charge);
-    });
+        final Charge charge = new Charge();
+        charge.setCode(chargeDefinition.getIdentifier());
+        charge.setName(chargeDefinition.getName());
+        charge.setAmount(costComponent.getAmount().doubleValue());
+        charges.add(charge);
+      });
+    } catch (final NotFoundException |  BadRequestException ex) {
+      throw ServiceException.internalError(
+          "Could not fetch portfolio information, reason: {0}", ex.getCause() + " - " + ex.getMessage()
+      );
+    }
 
     return charges;
   }
 
   public void processRepayment(final String productIdentifier, final String caseIdentifier, final String tellerAccount) {
 
-    final List<CostComponent> costComponentsForAction =
-        this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
+    try {
+      final List<CostComponent> costComponentsForAction =
+          this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
 
-    final Command repaymentCommand = new Command();
-    repaymentCommand.setOneTimeAccountAssignments(this.getAccountAssignments(tellerAccount));
-    repaymentCommand.setPaymentSize(BigDecimal.valueOf(
-        costComponentsForAction.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum())
-    );
+      final Command repaymentCommand = new Command();
+      repaymentCommand.setOneTimeAccountAssignments(this.getAccountAssignments(tellerAccount));
+      repaymentCommand.setPaymentSize(BigDecimal.valueOf(
+          costComponentsForAction.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum())
+      );
 
-    portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), repaymentCommand);
+      portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), repaymentCommand);
+    } catch (final NotFoundException |  BadRequestException ex) {
+      throw ServiceException.internalError(
+          "Could not process repayment, reason: {0}", ex.getCause() + " - " + ex.getMessage()
+      );
+    }
   }
 
   private List<AccountAssignment> getAccountAssignments(final String tellerAccount) {

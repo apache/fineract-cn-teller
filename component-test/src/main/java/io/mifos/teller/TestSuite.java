@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     TestTellerManagement.class,
-    TestTellerOperation.class,
+    TestTellerOperation.class
 })
 public class TestSuite extends SuiteTestEnvironment {
 }
