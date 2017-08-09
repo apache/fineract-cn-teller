@@ -63,11 +63,16 @@ public class DepositTransactionHandler {
   public TellerTransactionCosts getTellerTransactionCosts(final TellerTransaction tellerTransaction) {
     final List<Charge> charges = this.depositAccountManagementService.getCharges(tellerTransaction);
 
+    final List<Charge> cleanedCharges = charges
+        .stream()
+        .filter(charge -> charge.getAmount() != null && charge.getAmount() > 0.00D)
+        .collect(Collectors.toList());
+
     final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
-    tellerTransactionCosts.setCharges(charges);
+    tellerTransactionCosts.setCharges(cleanedCharges);
     tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
     tellerTransactionCosts.setTotalAmount(
-        tellerTransaction.getAmount() + charges.stream().mapToDouble(Charge::getAmount).sum()
+        tellerTransaction.getAmount() + cleanedCharges.stream().mapToDouble(Charge::getAmount).sum()
     );
 
     return tellerTransactionCosts;
