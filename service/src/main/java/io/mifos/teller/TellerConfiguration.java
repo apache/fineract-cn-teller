@@ -17,6 +17,7 @@ package io.mifos.teller;
 
 import io.mifos.accounting.api.v1.client.LedgerManager;
 import io.mifos.anubis.config.EnableAnubis;
+import io.mifos.cheque.api.v1.client.ChequeManager;
 import io.mifos.core.async.config.EnableAsync;
 import io.mifos.core.cassandra.config.EnableCassandra;
 import io.mifos.core.command.config.EnableCommandProcessing;
@@ -56,7 +57,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         OrganizationManager.class,
         LedgerManager.class,
         DepositAccountManager.class,
-        PortfolioManager.class
+        PortfolioManager.class,
+        ChequeManager.class
     }
 )
 @ComponentScan({

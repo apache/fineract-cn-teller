@@ -18,7 +18,10 @@ package io.mifos.teller.service.internal.service;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.service.internal.mapper.ChequeMapper;
 import io.mifos.teller.service.internal.mapper.TellerTransactionMapper;
+import io.mifos.teller.service.internal.repository.ChequeEntity;
+import io.mifos.teller.service.internal.repository.ChequeRepository;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.repository.TellerTransactionRepository;
@@ -38,15 +41,18 @@ public class TellerOperationService {
   private final Logger logger;
   private final TellerRepository tellerRepository;
   private final TellerTransactionRepository tellerTransactionRepository;
+  private final ChequeRepository chequeRepository;
 
   @Autowired
   public TellerOperationService(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                                 final TellerRepository tellerRepository,
-                                final TellerTransactionRepository tellerTransactionRepository) {
+                                final TellerTransactionRepository tellerTransactionRepository,
+                                final ChequeRepository chequeRepository) {
     super();
     this.logger = logger;
     this.tellerRepository = tellerRepository;
     this.tellerTransactionRepository = tellerTransactionRepository;
+    this.chequeRepository = chequeRepository;
   }
 
   public boolean tellerTransactionExists(final String tellerTransactionIdentifier) {
@@ -60,12 +66,30 @@ public class TellerOperationService {
       if (state != null) {
         return this.tellerTransactionRepository.findByTellerAndStateOrderByTransactionDateAsc(tellerEntity, state)
             .stream()
-            .map(TellerTransactionMapper::map)
+            .map(tellerTransactionEntity -> {
+              final TellerTransaction tellerTransaction = TellerTransactionMapper.map(tellerTransactionEntity);
+              if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+                final Optional<ChequeEntity> optionalCheque =
+                    this.chequeRepository.findByTellerTransactionId(tellerTransactionEntity.getId());
+
+                optionalCheque.ifPresent(chequeEntity -> tellerTransaction.setCheque(ChequeMapper.map(chequeEntity)));
+              }
+              return tellerTransaction;
+            })
             .collect(Collectors.toList());
       } else {
         return this.tellerTransactionRepository.findByTellerOrderByTransactionDateAsc(tellerEntity)
             .stream()
-            .map(TellerTransactionMapper::map)
+            .map(tellerTransactionEntity -> {
+              final TellerTransaction tellerTransaction = TellerTransactionMapper.map(tellerTransactionEntity);
+              if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+                final Optional<ChequeEntity> optionalCheque =
+                    this.chequeRepository.findByTellerTransactionId(tellerTransactionEntity.getId());
+
+                optionalCheque.ifPresent(chequeEntity -> tellerTransaction.setCheque(ChequeMapper.map(chequeEntity)));
+              }
+              return tellerTransaction;
+            })
             .collect(Collectors.toList());
       }
     } else {
