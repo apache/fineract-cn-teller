@@ -18,15 +18,20 @@ package io.mifos.teller.service.internal.command.handler;
 import io.mifos.core.command.annotation.Aggregate;
 import io.mifos.core.command.annotation.CommandHandler;
 import io.mifos.core.command.annotation.EventEmitter;
+import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.EventConstants;
+import io.mifos.teller.api.v1.domain.Cheque;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.service.internal.command.CancelTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.ConfirmTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.InitializeTellerTransactionCommand;
+import io.mifos.teller.service.internal.mapper.ChequeMapper;
 import io.mifos.teller.service.internal.mapper.TellerTransactionMapper;
 import io.mifos.teller.service.internal.processor.TellerTransactionProcessor;
+import io.mifos.teller.service.internal.repository.ChequeEntity;
+import io.mifos.teller.service.internal.repository.ChequeRepository;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.repository.TellerTransactionEntity;
@@ -37,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.util.Optional;
 
 @Aggregate
@@ -46,17 +52,20 @@ public class TellerTransactionAggregate {
   private final TellerTransactionRepository tellerTransactionRepository;
   private final TellerTransactionProcessor tellerTransactionProcessor;
   private final TellerRepository tellerRepository;
+  private final ChequeRepository chequeRepository;
 
   @Autowired
   public TellerTransactionAggregate(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                                     final TellerTransactionRepository tellerTransactionRepository,
                                     final TellerTransactionProcessor tellerTransactionProcessor,
-                                    final TellerRepository tellerRepository) {
+                                    final TellerRepository tellerRepository,
+                                    final ChequeRepository chequeRepository) {
     super();
     this.logger = logger;
     this.tellerTransactionRepository = tellerTransactionRepository;
     this.tellerTransactionProcessor = tellerTransactionProcessor;
     this.tellerRepository = tellerRepository;
+    this.chequeRepository = chequeRepository;
   }
 
   @Transactional
@@ -72,7 +81,24 @@ public class TellerTransactionAggregate {
       tellerTransaction.setState(TellerTransaction.State.PENDING.name());
       final TellerTransactionEntity tellerTransactionEntity = TellerTransactionMapper.map(tellerTransaction);
       tellerTransactionEntity.setTeller(optionalTeller.get());
-      this.tellerTransactionRepository.save(tellerTransactionEntity);
+      final TellerTransactionEntity savedTellerTransaction = this.tellerTransactionRepository.save(tellerTransactionEntity);
+
+      if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+        final Cheque cheque = tellerTransaction.getCheque();
+        final ChequeEntity chequeEntity = new ChequeEntity();
+        chequeEntity.setTellerTransactionId(savedTellerTransaction.getId());
+        chequeEntity.setChequeNumber(cheque.getMicr().getChequeNumber());
+        chequeEntity.setBranchSortCode(cheque.getMicr().getBranchSortCode());
+        chequeEntity.setAccountNumber(cheque.getMicr().getAccountNumber());
+        chequeEntity.setDrawee(cheque.getDrawee());
+        chequeEntity.setDrawer(cheque.getDrawer());
+        chequeEntity.setPayee(cheque.getPayee());
+        chequeEntity.setDateIssued(Date.valueOf(DateConverter.dateFromIsoString(cheque.getDateIssued())));
+        chequeEntity.setAmount(Double.valueOf(cheque.getAmount()));
+        chequeEntity.setOpenCheque(cheque.isOpenCheque());
+        this.chequeRepository.save(chequeEntity);
+      }
+
       return this.tellerTransactionProcessor.getCosts(tellerTransaction);
     } else {
       this.logger.warn("Teller {} not found.", tellerCode);
@@ -89,10 +115,17 @@ public class TellerTransactionAggregate {
 
     if (optionalTellerTransaction.isPresent()) {
       final TellerTransactionEntity tellerTransactionEntity = optionalTellerTransaction.get();
+      final TellerTransaction tellerTransaction = TellerTransactionMapper.map(tellerTransactionEntity);
+
+      if (tellerTransactionEntity.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+        final Optional<ChequeEntity> optionalCheque =
+            this.chequeRepository.findByTellerTransactionId(tellerTransactionEntity.getId());
+
+        optionalCheque.ifPresent(chequeEntity -> tellerTransaction.setCheque(ChequeMapper.map(chequeEntity)));
+      }
 
       this.tellerTransactionProcessor.process(tellerTransactionEntity.getTeller().getIdentifier(),
-          TellerTransactionMapper.map(tellerTransactionEntity),
-          confirmTellerTransactionCommand.chargesIncluded());
+          tellerTransaction, confirmTellerTransactionCommand.chargesIncluded());
 
       tellerTransactionEntity.setState(TellerTransaction.State.CONFIRMED.name());
       this.tellerTransactionRepository.save(tellerTransactionEntity);

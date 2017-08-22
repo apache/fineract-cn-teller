@@ -22,19 +22,24 @@ import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
+import io.mifos.teller.api.v1.domain.Cheque;
+import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
+import io.mifos.teller.service.internal.service.helper.ChequeService;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
@@ -42,6 +47,9 @@ import java.util.Optional;
 public class TestTellerOperation extends AbstractTellerTest {
 
   private static Teller tellerUnderTest = null;
+
+  @MockBean
+  private ChequeService chequeService;
 
   public TestTellerOperation() {
     super();
@@ -499,5 +507,61 @@ public class TestTellerOperation extends AbstractTellerTest {
     final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), repaymentTransaction);
 
     super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", null);
+  }
+
+  @Test
+  public void shouldProcessCheque() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction chequeTransaction =  new TellerTransaction();
+    chequeTransaction.setTransactionType(ServiceConstants.TX_CHEQUE);
+    chequeTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    chequeTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setProductCaseIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    chequeTransaction.setAmount(246.80D);
+
+    final MICR micr = new MICR();
+    micr.setChequeNumber("0011");
+    micr.setBranchSortCode("08154711");
+    micr.setAccountNumber("4711");
+
+    final Cheque cheque = new Cheque();
+    cheque.setMicr(micr);
+    cheque.setDrawee("whatever Bank");
+    cheque.setDrawer("Jane Doe");
+    cheque.setPayee("John Doe");
+    cheque.setDateIssued(DateConverter.toIsoString(LocalDate.now(Clock.systemUTC())));
+    cheque.setAmount("246.80");
+    cheque.setOpenCheque(Boolean.FALSE);
+    chequeTransaction.setCheque(cheque);
+
+    Mockito
+        .doAnswer(invocation -> {
+          final Account mockedAccount = new Account();
+          mockedAccount.setState(Account.State.OPEN.name());
+          return Optional.of(mockedAccount);
+        })
+        .when(super.accountingServiceSpy).findAccount(chequeTransaction.getCustomerAccountIdentifier());
+
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), chequeTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(),
+        "CONFIRM", null);
+
+    Assert.assertTrue(
+        super.eventRecorder.wait(EventConstants.CONFIRM_TRANSACTION,
+            tellerTransactionCosts.getTellerTransactionIdentifier())
+    );
   }
 }

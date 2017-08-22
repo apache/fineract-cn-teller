@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.mifos.teller;
+package io.mifos.teller.service.internal.repository;
 
-public interface ServiceConstants {
-  String LOGGER_NAME = "teller-logger";
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-  int ITERATION_COUNT = 2048;
-  int LENGTH = 2048;
+import java.util.Optional;
 
-  String TX_OPEN_ACCOUNT = "ACCO";
-  String TX_CLOSE_ACCOUNT = "ACCC";
-  String TX_ACCOUNT_TRANSFER = "ACCT";
-  String TX_CASH_DEPOSIT = "CDPT";
-  String TX_CASH_WITHDRAWAL = "CWDL";
-  String TX_REPAYMENT = "PPAY";
-  String TX_CHEQUE = "CCHQ";
+@Repository
+public interface ChequeRepository extends JpaRepository<ChequeEntity, Long> {
 
-  String TX_DEPOSIT_ADJUSTMENT = "DAJT";
-  String TX_CREDIT_ADJUSTMENT = "CAJT";
-  String TX_CHARGES = "CHRG";
+  Optional<ChequeEntity> findByTellerTransactionId(final Long tellerTransactionId);
 }

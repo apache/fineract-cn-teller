@@ -33,23 +33,23 @@
         </encoder>
     </appender>
 
-    <logger name="com" level="WARN">
+    <logger name="com" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org" level="WARN">
+    <logger name="org" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="io" level="WARN">
+    <logger name="io" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="net" level="WARN">
+    <logger name="net" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <root level="INFO">
+    <root level="DEBUG">
         <appender-ref ref="FILE"/>
     </root>
 </configuration>

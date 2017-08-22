@@ -17,6 +17,7 @@ package io.mifos.teller.api.v1.domain;
 
 import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
@@ -50,6 +51,8 @@ public class TellerTransaction {
   @DecimalMin("0.00")
   private Double amount;
   private State state;
+  @Valid
+  private Cheque cheque;
 
   public TellerTransaction() {
     super();
@@ -141,5 +144,13 @@ public class TellerTransaction {
 
   public void setState(final String state) {
     this.state = State.valueOf(state);
+  }
+
+  public Cheque getCheque() {
+    return this.cheque;
+  }
+
+  public void setCheque(final Cheque cheque) {
+    this.cheque = cheque;
   }
 }
