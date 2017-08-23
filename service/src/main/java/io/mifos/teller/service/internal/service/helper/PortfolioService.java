@@ -15,6 +15,7 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
+import com.google.common.collect.Sets;
 import io.mifos.core.api.util.NotFoundException;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.individuallending.api.v1.domain.product.AccountDesignators;
@@ -51,13 +52,16 @@ public class PortfolioService {
     this.portfolioManager = portfolioManager;
   }
 
-  public List<Charge> getCharges(final String productIdentifier, final String caseIdentifier) {
+  public List<Charge> getCharges(final String productIdentifier, final String caseIdentifier, final Double paymentSize) {
 
     final List<Charge> charges =  new ArrayList<>();
 
     try {
+      //TODO switch CostComponent to PlannedPayment once avail
       final List<CostComponent> costComponentsForAction =
-          this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
+          this.portfolioManager.getCostComponentsForAction(
+              productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(),
+              BigDecimal.valueOf(paymentSize));
 
       costComponentsForAction.forEach(costComponent -> {
         final ChargeDefinition chargeDefinition =
@@ -78,19 +82,16 @@ public class PortfolioService {
     return charges;
   }
 
-  public void processRepayment(final String productIdentifier, final String caseIdentifier, final String tellerAccount) {
+  public void processRepayment(final String productIdentifier, final String caseIdentifier, final String tellerAccount,
+                               final Double paymentSize) {
 
     try {
-      final List<CostComponent> costComponentsForAction =
-          this.portfolioManager.getCostComponentsForAction(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name());
-
       final Command repaymentCommand = new Command();
       repaymentCommand.setOneTimeAccountAssignments(this.getAccountAssignments(tellerAccount));
-      repaymentCommand.setPaymentSize(BigDecimal.valueOf(
-          costComponentsForAction.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum())
-      );
+      repaymentCommand.setPaymentSize(BigDecimal.valueOf(paymentSize));
 
-      portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), repaymentCommand);
+      portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(),
+          repaymentCommand);
     } catch (final NotFoundException |  BadRequestException ex) {
       throw ServiceException.internalError(
           "Could not process repayment, reason: {0}", ex.getCause() + " - " + ex.getMessage()
