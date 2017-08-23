@@ -49,7 +49,9 @@ public class PortfolioTransactionHandler {
   public TellerTransactionCosts getTellerTransactionCosts(final TellerTransaction tellerTransaction) {
     final List<Charge> charges =
         this.portfolioService.getCharges(
-            tellerTransaction.getProductIdentifier(), tellerTransaction.getProductCaseIdentifier()
+            tellerTransaction.getProductIdentifier(),
+            tellerTransaction.getProductCaseIdentifier(),
+            tellerTransaction.getAmount()
         );
 
     final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
@@ -70,7 +72,8 @@ public class PortfolioTransactionHandler {
       this.portfolioService.processRepayment(
           tellerTransaction.getProductIdentifier(),
           tellerTransaction.getProductCaseIdentifier(),
-          tellerEntity.getTellerAccountIdentifier()
+          tellerEntity.getTellerAccountIdentifier(),
+          tellerTransaction.getAmount()
       );
 
     } else {
