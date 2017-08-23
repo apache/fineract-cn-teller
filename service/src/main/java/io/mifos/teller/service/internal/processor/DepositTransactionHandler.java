@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -65,14 +66,15 @@ public class DepositTransactionHandler {
 
     final List<Charge> cleanedCharges = charges
         .stream()
-        .filter(charge -> charge.getAmount() != null && charge.getAmount() > 0.00D)
+        .filter(charge -> charge.getAmount() != null && charge.getAmount().compareTo(BigDecimal.ZERO) > 0)
         .collect(Collectors.toList());
 
     final TellerTransactionCosts tellerTransactionCosts = new TellerTransactionCosts();
     tellerTransactionCosts.setCharges(cleanedCharges);
     tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
     tellerTransactionCosts.setTotalAmount(
-        tellerTransaction.getAmount() + cleanedCharges.stream().mapToDouble(Charge::getAmount).sum()
+        tellerTransaction.getAmount().add(
+            BigDecimal.valueOf(cleanedCharges.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum()))
     );
 
     return tellerTransactionCosts;
@@ -200,7 +202,7 @@ public class DepositTransactionHandler {
 
     this.processCashDeposit(tellerCode, tellerTransaction, chargesIncluded);
 
-    if ((tellerTransaction.getAmount() + productInstances.getBalance()) >= productDefinition.getMinimumBalance()) {
+    if ((tellerTransaction.getAmount().doubleValue() + productInstances.getBalance()) >= productDefinition.getMinimumBalance()) {
       this.depositAccountManagementService.activateProductInstance(tellerTransaction.getCustomerAccountIdentifier());
       this.accountingService.openAccount(tellerTransaction.getCustomerAccountIdentifier());
     }
@@ -234,7 +236,7 @@ public class DepositTransactionHandler {
         Double.valueOf(
             tellerTransactionCosts.getCharges()
                 .stream()
-                .mapToDouble(Charge::getAmount)
+                .mapToDouble(value -> value.getAmount().doubleValue())
                 .sum()
         ).toString()
     );

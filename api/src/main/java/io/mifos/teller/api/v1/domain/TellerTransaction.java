@@ -20,6 +20,7 @@ import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 public class TellerTransaction {
 
@@ -48,8 +49,8 @@ public class TellerTransaction {
   @ValidIdentifier
   private String clerk;
   @NotNull
-  @DecimalMin("0.00")
-  private Double amount;
+  @DecimalMin(value = "0.00", inclusive = false)
+  private BigDecimal amount;
   private State state;
   @Valid
   private Cheque cheque;
@@ -130,11 +131,11 @@ public class TellerTransaction {
     this.clerk = clerk;
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 

@@ -94,7 +94,7 @@ public class TellerTransactionAggregate {
         chequeEntity.setDrawer(cheque.getDrawer());
         chequeEntity.setPayee(cheque.getPayee());
         chequeEntity.setDateIssued(Date.valueOf(DateConverter.dateFromIsoString(cheque.getDateIssued())));
-        chequeEntity.setAmount(Double.valueOf(cheque.getAmount()));
+        chequeEntity.setAmount(cheque.getAmount());
         chequeEntity.setOpenCheque(cheque.isOpenCheque());
         this.chequeRepository.save(chequeEntity);
       }

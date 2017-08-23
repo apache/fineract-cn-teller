@@ -18,8 +18,9 @@ package io.mifos.teller.api.v1.domain;
 import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 public class Teller {
 
@@ -34,9 +35,9 @@ public class Teller {
   private String code;
   @NotEmpty
   private String password;
-  @NotNull
   @DecimalMin("0.00")
-  private Double cashdrawLimit;
+  @DecimalMax("1000000000.00")
+  private BigDecimal cashdrawLimit;
   @ValidIdentifier
   private String tellerAccountIdentifier;
   @ValidIdentifier
@@ -68,11 +69,11 @@ public class Teller {
     this.password = password;
   }
 
-  public Double getCashdrawLimit() {
+  public BigDecimal getCashdrawLimit() {
     return this.cashdrawLimit;
   }
 
-  public void setCashdrawLimit(final Double cashdrawLimit) {
+  public void setCashdrawLimit(final BigDecimal cashdrawLimit) {
     this.cashdrawLimit = cashdrawLimit;
   }
 

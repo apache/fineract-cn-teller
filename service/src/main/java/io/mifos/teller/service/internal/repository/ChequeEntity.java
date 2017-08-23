@@ -21,6 +21,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.sql.Date;
 
 @Entity
@@ -46,7 +47,7 @@ public class ChequeEntity {
   @Column(name = "payee", nullable = false, length = 256)
   private String payee;
   @Column(name = "amount", nullable = false)
-  private Double amount;
+  private BigDecimal amount;
   @Column(name = "date_issued", nullable = false)
   private Date dateIssued;
   @Column(name = "open_cheque", nullable = true)
@@ -120,11 +121,11 @@ public class ChequeEntity {
     this.payee = payee;
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 

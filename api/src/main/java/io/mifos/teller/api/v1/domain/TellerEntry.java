@@ -15,6 +15,9 @@
  */
 package io.mifos.teller.api.v1.domain;
 
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
+
 public class TellerEntry {
 
   public enum Type {
@@ -25,7 +28,8 @@ public class TellerEntry {
   private Type type;
   private String transactionDate;
   private String message;
-  private Double amount;
+  @DecimalMin("0.00")
+  private BigDecimal amount;
 
   public TellerEntry() {
     super();
@@ -55,11 +59,11 @@ public class TellerEntry {
     this.message = message;
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 }

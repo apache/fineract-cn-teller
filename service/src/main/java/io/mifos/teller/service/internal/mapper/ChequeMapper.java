@@ -39,7 +39,7 @@ public class ChequeMapper {
     cheque.setDrawer(tellerCheque.getDrawer());
     cheque.setPayee(tellerCheque.getPayee());
     cheque.setDateIssued(tellerCheque.getDateIssued());
-    cheque.setAmount(tellerCheque.getAmount());
+    cheque.setAmount(tellerCheque.getAmount().toString());
     cheque.setOpenCheque(tellerCheque.isOpenCheque());
 
     return cheque;
@@ -57,7 +57,7 @@ public class ChequeMapper {
     cheque.setDrawer(chequeEntity.getDrawer());
     cheque.setPayee(chequeEntity.getPayee());
     cheque.setDateIssued(DateConverter.toIsoString(chequeEntity.getDateIssued().toLocalDate()));
-    cheque.setAmount(chequeEntity.getAmount().toString());
+    cheque.setAmount(chequeEntity.getAmount());
     cheque.setOpenCheque(chequeEntity.getOpenCheque());
     return cheque;
   }

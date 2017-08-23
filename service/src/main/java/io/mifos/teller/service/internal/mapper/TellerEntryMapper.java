@@ -18,6 +18,8 @@ package io.mifos.teller.service.internal.mapper;
 import io.mifos.accounting.api.v1.domain.AccountEntry;
 import io.mifos.teller.api.v1.domain.TellerEntry;
 
+import java.math.BigDecimal;
+
 public class TellerEntryMapper {
 
   private TellerEntryMapper() {
@@ -29,7 +31,7 @@ public class TellerEntryMapper {
     tellerEntry.setType(accountEntry.getType());
     tellerEntry.setTransactionDate(accountEntry.getTransactionDate());
     tellerEntry.setMessage(accountEntry.getMessage());
-    tellerEntry.setAmount(accountEntry.getAmount());
+    tellerEntry.setAmount(BigDecimal.valueOf(accountEntry.getAmount()));
 
     return tellerEntry;
   }

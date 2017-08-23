@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -222,7 +223,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode());
 
-    teller.setCashdrawLimit(15000.00D);
+    teller.setCashdrawLimit(BigDecimal.valueOf(15000.00D));
 
     super.testSubject.change(officeIdentifier, teller.getCode(), teller);
 
@@ -478,10 +479,28 @@ public class TestTellerManagement extends AbstractTellerTest {
     super.testSubject.post(officeIdentifier, teller.getCode(), command);
   }
 
+  @Test(expected = TellerValidationException.class)
+  public void shouldNotCreateTellerMinimumCashWithdrawalLimitViolation() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(0.00001D));
+
+    super.testSubject.create(officeIdentifier, teller);
+  }
+
+  @Test(expected = TellerValidationException.class)
+  public void shouldNotCreateTellerMaximumCashWithdrawalLimitViolation() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(2000000000));
+
+    super.testSubject.create(officeIdentifier, teller);
+  }
+
   private void compareTeller(final Teller expected, final Teller actual) {
     Assert.assertEquals(expected.getCode(), actual.getCode());
     Assert.assertEquals(expected.getTellerAccountIdentifier(), actual.getTellerAccountIdentifier());
     Assert.assertEquals(expected.getVaultAccountIdentifier(), actual.getVaultAccountIdentifier());
-    Assert.assertEquals(expected.getCashdrawLimit(), actual.getCashdrawLimit());
+    Assert.assertTrue(expected.getCashdrawLimit().compareTo(actual.getCashdrawLimit()) == 0);
   }
 }
