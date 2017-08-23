@@ -15,12 +15,15 @@
  */
 package io.mifos.teller.api.v1.domain;
 
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class TellerBalanceSheet {
 
   private String day;
-  private Double balance;
+  @DecimalMin("0.00")
+  private BigDecimal balance;
   private List<TellerEntry> entries;
 
   public TellerBalanceSheet() {
@@ -35,11 +38,11 @@ public class TellerBalanceSheet {
     this.day = day;
   }
 
-  public Double getBalance() {
+  public BigDecimal getBalance() {
     return this.balance;
   }
 
-  public void setBalance(final Double balance) {
+  public void setBalance(final BigDecimal balance) {
     this.balance = balance;
   }
 

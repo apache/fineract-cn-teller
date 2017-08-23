@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,10 +75,11 @@ public class DepositAccountManagementService {
         charge.setIncomeAccountIdentifier(productCharge.getIncomeAccountIdentifier());
         charge.setName(productCharge.getName());
         if (productCharge.getProportional()) {
-          final Double amount = tellerTransaction.getAmount();
-          charge.setAmount(amount / 100.0D * productCharge.getAmount());
+          charge.setAmount(
+              tellerTransaction.getAmount().divide(BigDecimal.valueOf(100)).multiply(BigDecimal.valueOf(productCharge.getAmount()))
+          );
         } else {
-          charge.setAmount(productCharge.getAmount());
+          charge.setAmount(BigDecimal.valueOf(productCharge.getAmount()));
         }
         charges.add(charge);
       }

@@ -49,6 +49,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,7 +161,7 @@ public class TellerOperationRestController {
 
     if (transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
         || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
-      if (tellerTransaction.getAmount() > teller.getCashdrawLimit()) {
+      if (tellerTransaction.getAmount().compareTo(teller.getCashdrawLimit()) > 0) {
         throw ServiceException.conflict("Amount exceeds cash drawl limit.");
       }
     }
@@ -181,7 +182,7 @@ public class TellerOperationRestController {
           || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
 
 
-        if (customerAccount.getBalance() < tellerTransaction.getAmount()) {
+        if (tellerTransaction.getAmount().compareTo(BigDecimal.valueOf(customerAccount.getBalance())) > 0 ) {
           throw ServiceException.conflict("Not enough balance.");
         }
       }

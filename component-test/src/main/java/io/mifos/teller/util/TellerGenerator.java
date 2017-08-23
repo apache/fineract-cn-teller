@@ -18,6 +18,8 @@ package io.mifos.teller.util;
 import io.mifos.teller.api.v1.domain.Teller;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.math.BigDecimal;
+
 public class TellerGenerator {
 
   public TellerGenerator() {
@@ -30,7 +32,7 @@ public class TellerGenerator {
     teller.setPassword(RandomStringUtils.randomAlphanumeric(12));
     teller.setTellerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     teller.setVaultAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
-    teller.setCashdrawLimit(10000.00D);
+    teller.setCashdrawLimit(BigDecimal.valueOf(10000L));
 
     return teller;
   }

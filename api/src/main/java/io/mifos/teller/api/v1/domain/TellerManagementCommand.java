@@ -17,7 +17,9 @@ package io.mifos.teller.api.v1.domain;
 
 import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 public class TellerManagementCommand {
 
@@ -36,7 +38,8 @@ public class TellerManagementCommand {
   private Action action;
   @NotNull
   private Adjustment adjustment;
-  private Double amount;
+  @DecimalMin("0.00")
+  private BigDecimal amount;
   @ValidIdentifier(optional = true)
   private String assignedEmployeeIdentifier;
 
@@ -60,11 +63,11 @@ public class TellerManagementCommand {
     this.adjustment = Adjustment.valueOf(adjustment);
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 

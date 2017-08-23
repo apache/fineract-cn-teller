@@ -24,6 +24,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -43,7 +44,7 @@ public class TellerEntity {
   @Column(name = "office_identifier", nullable = false, length = 32)
   private String officeIdentifier;
   @Column(name = "cashdraw_limit", nullable = false)
-  private Double cashdrawLimit;
+  private BigDecimal cashdrawLimit;
   @Column(name = "teller_account_identifier", nullable = false, length = 32)
   private String tellerAccountIdentifier;
   @Column(name = "vault_account_identifier", nullable = false, length = 32)
@@ -107,11 +108,11 @@ public class TellerEntity {
     this.officeIdentifier = officeIdentifier;
   }
 
-  public Double getCashdrawLimit() {
+  public BigDecimal getCashdrawLimit() {
     return this.cashdrawLimit;
   }
 
-  public void setCashdrawLimit(final Double cashdrawLimit) {
+  public void setCashdrawLimit(final BigDecimal cashdrawLimit) {
     this.cashdrawLimit = cashdrawLimit;
   }
 

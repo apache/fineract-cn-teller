@@ -38,6 +38,7 @@ import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +48,7 @@ import java.util.Optional;
 public class TestTellerOperation extends AbstractTellerTest {
 
   private static Teller tellerUnderTest = null;
+  private final BigDecimal commonAmount = BigDecimal.valueOf(1234.56D);
 
   @MockBean
   private ChequeService chequeService;
@@ -125,7 +127,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(1234.56D);
+    tellerTransaction.setAmount(BigDecimal.valueOf(1234.56D));
 
     final Account account = new Account();
     account.setState(Account.State.OPEN.name());
@@ -158,7 +160,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(1234.56D);
+    tellerTransaction.setAmount(commonAmount);
 
     final Account account = new Account();
     account.setBalance(2000.00D);
@@ -193,7 +195,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setTargetAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(1234.56D);
+    tellerTransaction.setAmount(commonAmount);
 
     final Account account = new Account();
     account.setBalance(2000.00D);
@@ -229,7 +231,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(1234.56D);
+    tellerTransaction.setAmount(commonAmount);
 
     final Account account = new Account();
     account.setState(Account.State.OPEN.name());
@@ -262,7 +264,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(1234.56D);
+    tellerTransaction.setAmount(commonAmount);
 
     final Account account = new Account();
     account.setBalance(2000.00D);
@@ -296,7 +298,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(5000.00D);
+    tellerTransaction.setAmount(BigDecimal.valueOf(5000L));
 
     final Account account = new Account();
     account.setBalance(2000.00D);
@@ -330,7 +332,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(15000.00D);
+    tellerTransaction.setAmount(BigDecimal.valueOf(15000L));
 
     final Account account = new Account();
     account.setBalance(20000.00D);
@@ -433,7 +435,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     openAccountTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     openAccountTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     openAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    openAccountTransaction.setAmount(1234.56D);
+    openAccountTransaction.setAmount(commonAmount);
 
     final Account account = new Account();
     account.setState(Account.State.OPEN.name());
@@ -455,7 +457,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     closeAccountTransaction.setCustomerAccountIdentifier(openAccountTransaction.getCustomerAccountIdentifier());
     closeAccountTransaction.setCustomerIdentifier(openAccountTransaction.getCustomerIdentifier());
     closeAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    closeAccountTransaction.setAmount(1234.56D);
+    closeAccountTransaction.setAmount(commonAmount);
 
     account.setBalance(1234.56D);
 
@@ -472,7 +474,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     reopenAccountTransaction.setCustomerAccountIdentifier(openAccountTransaction.getCustomerAccountIdentifier());
     reopenAccountTransaction.setCustomerIdentifier(openAccountTransaction.getCustomerIdentifier());
     reopenAccountTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    reopenAccountTransaction.setAmount(1234.56D);
+    reopenAccountTransaction.setAmount(commonAmount);
 
     super.testSubject.post(teller.getCode(), reopenAccountTransaction);
   }
@@ -497,7 +499,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     repaymentTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     repaymentTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     repaymentTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    repaymentTransaction.setAmount(246.80D);
+    repaymentTransaction.setAmount(BigDecimal.valueOf(246.80D));
 
     final Account account = new Account();
     account.setState(Account.State.OPEN.name());
@@ -529,7 +531,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     chequeTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     chequeTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     chequeTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    chequeTransaction.setAmount(246.80D);
+    chequeTransaction.setAmount(BigDecimal.valueOf(246.80D));
 
     final MICR micr = new MICR();
     micr.setChequeNumber("0011");
@@ -542,7 +544,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     cheque.setDrawer("Jane Doe");
     cheque.setPayee("John Doe");
     cheque.setDateIssued(DateConverter.toIsoString(LocalDate.now(Clock.systemUTC())));
-    cheque.setAmount("246.80");
+    cheque.setAmount(BigDecimal.valueOf(246.80D));
     cheque.setOpenCheque(Boolean.FALSE);
     chequeTransaction.setCheque(cheque);
 

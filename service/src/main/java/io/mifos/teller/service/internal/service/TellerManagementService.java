@@ -28,6 +28,7 @@ import io.mifos.teller.service.internal.service.helper.AccountingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -79,7 +80,9 @@ public class TellerManagementService {
       final List<TellerEntry> tellerEntries = this.fetchTellerEntries(accountIdentifier, dateRange, 0);
 
       tellerBalanceSheet.setDay(startDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-      tellerBalanceSheet.setBalance(tellerEntries.stream().mapToDouble(TellerEntry::getAmount).sum());
+      tellerBalanceSheet.setBalance(
+          BigDecimal.valueOf(tellerEntries.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum())
+      );
       tellerBalanceSheet.setEntries(tellerEntries);
     });
     return tellerBalanceSheet;

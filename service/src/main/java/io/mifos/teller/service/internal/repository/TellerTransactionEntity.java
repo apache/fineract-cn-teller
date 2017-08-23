@@ -28,6 +28,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -61,7 +62,7 @@ public class TellerTransactionEntity {
   @Column(name = "clerk", nullable = false, length = 32)
   private String clerk;
   @Column(name = "amount", nullable = false)
-  private Double amount;
+  private BigDecimal amount;
   @Column(name = "a_state", nullable = false, length = 256)
   private String state;
 
@@ -157,11 +158,11 @@ public class TellerTransactionEntity {
     this.clerk = clerk;
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 

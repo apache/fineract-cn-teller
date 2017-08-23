@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -153,7 +154,7 @@ public class TellerAggregate {
 
         if (!tellerManagementCommand.getAdjustment().equals(TellerManagementCommand.Adjustment.NONE.name())
             && tellerManagementCommand.getAmount() != null
-            && tellerManagementCommand.getAmount() > 0.00D) {
+            && tellerManagementCommand.getAmount().compareTo(BigDecimal.ZERO) > 0) {
           this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
         }
 
@@ -187,7 +188,7 @@ public class TellerAggregate {
 
         if (!tellerManagementCommand.getAdjustment().equals(TellerManagementCommand.Adjustment.NONE.name())
             && tellerManagementCommand.getAmount() != null
-            && tellerManagementCommand.getAmount() > 0.00D) {
+            && tellerManagementCommand.getAmount().compareTo(BigDecimal.ZERO) > 0) {
           this.accountingService.postJournalEntry(this.createJournalEntry(tellerEntity, tellerManagementCommand));
         }
         tellerEntity.setAssignedEmployeeIdentifier(null);
@@ -298,7 +299,7 @@ public class TellerAggregate {
 
   private JournalEntry createJournalEntry(final TellerEntity tellerEntity, final TellerManagementCommand tellerManagementCommand) {
 
-    if (tellerManagementCommand.getAmount() > tellerEntity.getCashdrawLimit()) {
+    if (tellerManagementCommand.getAmount().compareTo(tellerEntity.getCashdrawLimit()) > 0) {
       this.logger.warn("Adjustment {} exceeds cashdraw limit {}.", tellerManagementCommand.getAmount(),
           tellerEntity.getCashdrawLimit());
       throw new IllegalArgumentException("Adjustment exceeds cashdraw limit.");

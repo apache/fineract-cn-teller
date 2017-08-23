@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +59,9 @@ public class PortfolioTransactionHandler {
     tellerTransactionCosts.setCharges(charges);
     tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
     tellerTransactionCosts.setTotalAmount(
-        charges.stream().mapToDouble(Charge::getAmount).sum()
+        BigDecimal.valueOf(
+            charges.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum()
+        )
     );
 
     return tellerTransactionCosts;

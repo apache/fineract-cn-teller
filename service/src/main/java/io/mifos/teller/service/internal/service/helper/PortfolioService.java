@@ -52,7 +52,7 @@ public class PortfolioService {
     this.portfolioManager = portfolioManager;
   }
 
-  public List<Charge> getCharges(final String productIdentifier, final String caseIdentifier, final Double paymentSize) {
+  public List<Charge> getCharges(final String productIdentifier, final String caseIdentifier, final BigDecimal paymentSize) {
 
     final List<Charge> charges =  new ArrayList<>();
 
@@ -60,8 +60,7 @@ public class PortfolioService {
       //TODO switch CostComponent to PlannedPayment once avail
       final List<CostComponent> costComponentsForAction =
           this.portfolioManager.getCostComponentsForAction(
-              productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(),
-              BigDecimal.valueOf(paymentSize));
+              productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(), paymentSize);
 
       costComponentsForAction.forEach(costComponent -> {
         final ChargeDefinition chargeDefinition =
@@ -70,7 +69,7 @@ public class PortfolioService {
         final Charge charge = new Charge();
         charge.setCode(chargeDefinition.getIdentifier());
         charge.setName(chargeDefinition.getName());
-        charge.setAmount(costComponent.getAmount().doubleValue());
+        charge.setAmount(costComponent.getAmount());
         charges.add(charge);
       });
     } catch (final NotFoundException |  BadRequestException ex) {
@@ -83,12 +82,12 @@ public class PortfolioService {
   }
 
   public void processRepayment(final String productIdentifier, final String caseIdentifier, final String tellerAccount,
-                               final Double paymentSize) {
+                               final BigDecimal paymentSize) {
 
     try {
       final Command repaymentCommand = new Command();
       repaymentCommand.setOneTimeAccountAssignments(this.getAccountAssignments(tellerAccount));
-      repaymentCommand.setPaymentSize(BigDecimal.valueOf(paymentSize));
+      repaymentCommand.setPaymentSize(paymentSize);
 
       portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(),
           repaymentCommand);

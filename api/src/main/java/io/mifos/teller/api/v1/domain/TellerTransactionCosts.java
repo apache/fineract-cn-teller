@@ -15,12 +15,15 @@
  */
 package io.mifos.teller.api.v1.domain;
 
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class TellerTransactionCosts {
 
   private String tellerTransactionIdentifier;
-  private Double totalAmount;
+  @DecimalMin("0.00")
+  private BigDecimal totalAmount;
   private List<Charge> charges;
 
   public TellerTransactionCosts() {
@@ -35,11 +38,11 @@ public class TellerTransactionCosts {
     this.tellerTransactionIdentifier = tellerTransactionIdentifier;
   }
 
-  public Double getTotalAmount() {
+  public BigDecimal getTotalAmount() {
     return this.totalAmount;
   }
 
-  public void setTotalAmount(final Double totalAmount) {
+  public void setTotalAmount(final BigDecimal totalAmount) {
     this.totalAmount = totalAmount;
   }
 

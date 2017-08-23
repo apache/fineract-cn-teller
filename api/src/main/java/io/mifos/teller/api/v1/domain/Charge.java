@@ -15,12 +15,16 @@
  */
 package io.mifos.teller.api.v1.domain;
 
+import javax.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
+
 public class Charge {
 
   private String code;
   private String incomeAccountIdentifier;
   private String name;
-  private Double amount;
+  @DecimalMin(value = "0.00")
+  private BigDecimal amount;
 
   public Charge() {
     super();
@@ -50,11 +54,11 @@ public class Charge {
     this.name = name;
   }
 
-  public Double getAmount() {
+  public BigDecimal getAmount() {
     return this.amount;
   }
 
-  public void setAmount(final Double amount) {
+  public void setAmount(final BigDecimal amount) {
     this.amount = amount;
   }
 }
