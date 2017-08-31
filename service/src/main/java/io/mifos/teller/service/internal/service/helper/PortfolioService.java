@@ -17,6 +17,7 @@ package io.mifos.teller.service.internal.service.helper;
 
 import com.google.common.collect.Sets;
 import io.mifos.core.api.util.NotFoundException;
+import io.mifos.core.lang.DateConverter;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.individuallending.api.v1.domain.product.AccountDesignators;
 import io.mifos.individuallending.api.v1.domain.workflow.Action;
@@ -34,6 +35,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -88,6 +91,7 @@ public class PortfolioService {
       final Command repaymentCommand = new Command();
       repaymentCommand.setOneTimeAccountAssignments(this.getAccountAssignments(tellerAccount));
       repaymentCommand.setPaymentSize(paymentSize);
+      repaymentCommand.setCreatedOn(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
 
       portfolioManager.executeCaseCommand(productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(),
           repaymentCommand);
