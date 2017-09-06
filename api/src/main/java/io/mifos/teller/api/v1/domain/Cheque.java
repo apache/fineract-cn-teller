@@ -18,6 +18,7 @@ package io.mifos.teller.api.v1.domain;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -32,7 +33,8 @@ public class Cheque {
   @NotEmpty
   private String payee;
   @NotNull
-  @DecimalMin(value = "0.00", inclusive = false)
+  @DecimalMin(value = "0.001")
+  @DecimalMax(value = "9999999999.99999")
   private BigDecimal amount;
   @NotEmpty
   private String dateIssued;

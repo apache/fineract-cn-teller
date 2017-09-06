@@ -15,6 +15,7 @@
  */
 package io.mifos.teller.api.v1.domain;
 
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,7 +23,8 @@ import java.util.List;
 public class TellerTransactionCosts {
 
   private String tellerTransactionIdentifier;
-  @DecimalMin("0.00")
+  @DecimalMin(value = "0.001")
+  @DecimalMax(value = "9999999999.99999")
   private BigDecimal totalAmount;
   private List<Charge> charges;
 
