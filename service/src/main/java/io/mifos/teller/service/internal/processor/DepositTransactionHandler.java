@@ -236,6 +236,7 @@ public class DepositTransactionHandler {
         Double.valueOf(
             tellerTransactionCosts.getCharges()
                 .stream()
+                .filter(charge -> charge.getAmount() != null && charge.getAmount().compareTo(BigDecimal.ZERO) > 0)
                 .mapToDouble(value -> value.getAmount().doubleValue())
                 .sum()
         ).toString()
@@ -247,6 +248,7 @@ public class DepositTransactionHandler {
   private Set<Creditor> createChargeCreditors(final TellerTransactionCosts tellerTransactionCosts) {
     return tellerTransactionCosts.getCharges()
         .stream()
+        .filter(charge -> charge.getAmount() != null && charge.getAmount().compareTo(BigDecimal.ZERO) > 0)
         .map(charge -> {
           final Creditor chargeCreditor = new Creditor();
           chargeCreditor.setAccountNumber(charge.getIncomeAccountIdentifier());
