@@ -64,7 +64,7 @@ public class TellerTransactionProcessor {
         this.portfolioTransactionHandler.processRepayment(tellerCode, tellerTransaction);
         break;
       case ServiceConstants.TX_CHEQUE:
-        this.chequeTransactionHandler.processCheque(tellerTransaction);
+        this.chequeTransactionHandler.processCheque(tellerCode, tellerTransaction);
         break;
       default:
         throw new IllegalArgumentException("Unsupported TX type " + tellerTransaction.getTransactionType());

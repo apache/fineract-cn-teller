@@ -160,7 +160,75 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
-    tellerTransaction.setAmount(commonAmount);
+    tellerTransaction.setAmount(this.commonAmount);
+
+    final Account account = new Account();
+    account.setBalance(this.commonAmount.doubleValue());
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    super.testSubject.post(teller.getCode(), tellerTransaction);
+  }
+
+  @Test
+  public void shouldCloseAccountZeroBalance() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CLOSE_ACCOUNT);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(BigDecimal.ZERO);
+
+    final Account account = new Account();
+    account.setBalance(0.00D);
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    super.testSubject.post(teller.getCode(), tellerTransaction);
+  }
+
+  @Test(expected = TransactionProcessingException.class)
+  public void shouldNotCloseAccountRemainingBalance() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CLOSE_ACCOUNT);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(this.commonAmount);
 
     final Account account = new Account();
     account.setBalance(2000.00D);

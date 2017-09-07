@@ -38,10 +38,12 @@ public class Teller {
   @DecimalMin("0.00")
   @DecimalMax("1000000000.00")
   private BigDecimal cashdrawLimit;
-  @ValidIdentifier
+  @ValidIdentifier(maxLength = 34)
   private String tellerAccountIdentifier;
-  @ValidIdentifier
+  @ValidIdentifier(maxLength = 34)
   private String vaultAccountIdentifier;
+  @ValidIdentifier(maxLength = 34)
+  private String chequesReceivableAccount;
   private String assignedEmployee;
   private State state;
   private String createdBy;
@@ -91,6 +93,14 @@ public class Teller {
 
   public void setVaultAccountIdentifier(final String vaultAccountIdentifier) {
     this.vaultAccountIdentifier = vaultAccountIdentifier;
+  }
+
+  public String getChequesReceivableAccount() {
+    return this.chequesReceivableAccount;
+  }
+
+  public void setChequesReceivableAccount(final String chequesReceivableAccount) {
+    this.chequesReceivableAccount = chequesReceivableAccount;
   }
 
   public String getAssignedEmployee() {

@@ -30,8 +30,9 @@ public class TellerGenerator {
     final Teller teller = new Teller();
     teller.setCode(RandomStringUtils.randomAlphanumeric(32));
     teller.setPassword(RandomStringUtils.randomAlphanumeric(12));
-    teller.setTellerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
-    teller.setVaultAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    teller.setTellerAccountIdentifier(RandomStringUtils.randomAlphanumeric(34));
+    teller.setVaultAccountIdentifier(RandomStringUtils.randomAlphanumeric(34));
+    teller.setChequesReceivableAccount(RandomStringUtils.randomAlphanumeric(34));
     teller.setCashdrawLimit(BigDecimal.valueOf(10000L));
 
     return teller;

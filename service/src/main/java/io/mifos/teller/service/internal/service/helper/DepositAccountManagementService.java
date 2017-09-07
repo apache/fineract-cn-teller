@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,23 +67,28 @@ public class DepositAccountManagementService {
     final HashMap<String, Action> mappedActions = new HashMap<>(actions.size());
     actions.forEach(action -> mappedActions.put(action.getIdentifier(), action));
 
+    final MathContext mathContext = new MathContext(2, RoundingMode.HALF_EVEN);
     final Set<io.mifos.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
     productCharges.forEach(productCharge -> {
-      final Action action = mappedActions.get(productCharge.getActionIdentifier());
-      if (action != null
-          && action.getTransactionType().equals(tellerTransaction.getTransactionType())) {
-        final Charge charge = new Charge();
-        charge.setCode(productCharge.getActionIdentifier());
-        charge.setIncomeAccountIdentifier(productCharge.getIncomeAccountIdentifier());
-        charge.setName(productCharge.getName());
-        if (productCharge.getProportional()) {
-          charge.setAmount(
-              tellerTransaction.getAmount().divide(BigDecimal.valueOf(100)).multiply(BigDecimal.valueOf(productCharge.getAmount()))
-          );
-        } else {
-          charge.setAmount(BigDecimal.valueOf(productCharge.getAmount()));
+      if (productCharge.getAmount() > 0.00D) {
+        final Action action = mappedActions.get(productCharge.getActionIdentifier());
+        if (action != null
+            && action.getTransactionType().equals(tellerTransaction.getTransactionType())) {
+          final Charge charge = new Charge();
+          charge.setCode(productCharge.getActionIdentifier());
+          charge.setIncomeAccountIdentifier(productCharge.getIncomeAccountIdentifier());
+          charge.setName(productCharge.getName());
+          if (productCharge.getProportional()) {
+            charge.setAmount(
+                tellerTransaction.getAmount().multiply(
+                    BigDecimal.valueOf(productCharge.getAmount()).divide(BigDecimal.valueOf(100.00D), mathContext)
+                )
+            );
+          } else {
+            charge.setAmount(BigDecimal.valueOf(productCharge.getAmount()));
+          }
+          charges.add(charge);
         }
-        charges.add(charge);
       }
     });
     return charges;

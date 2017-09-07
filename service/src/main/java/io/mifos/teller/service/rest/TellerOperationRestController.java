@@ -20,6 +20,7 @@ import io.mifos.anubis.annotation.AcceptedTokenType;
 import io.mifos.anubis.annotation.Permittable;
 import io.mifos.core.api.util.UserContextHolder;
 import io.mifos.core.command.gateway.CommandGateway;
+import io.mifos.core.lang.DateConverter;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
@@ -50,6 +51,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -166,6 +169,14 @@ public class TellerOperationRestController {
       }
     }
 
+    if (transactionType.equals(ServiceConstants.TX_CHEQUE)) {
+      final LocalDate dateIssued = DateConverter.dateFromIsoString(tellerTransaction.getCheque().getDateIssued());
+      final LocalDate sixMonth = LocalDate.now(Clock.systemUTC()).minusMonths(6);
+      if (dateIssued.isBefore(sixMonth)) {
+        throw ServiceException.conflict("Cheque is older than 6 month.");
+      }
+    }
+
     final Optional<Account> optionalCustomerAccount =
         this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier());
     if (!optionalCustomerAccount.isPresent()) {
@@ -180,10 +191,16 @@ public class TellerOperationRestController {
       if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
           || transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
           || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
-
-
         if (tellerTransaction.getAmount().compareTo(BigDecimal.valueOf(customerAccount.getBalance())) > 0 ) {
           throw ServiceException.conflict("Not enough balance.");
+        }
+      }
+
+      if (transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
+        final BigDecimal newBalance =
+            BigDecimal.valueOf(customerAccount.getBalance()).subtract(tellerTransaction.getAmount());
+        if (newBalance.compareTo(BigDecimal.ZERO) > 0) {
+          throw ServiceException.conflict("Account has remaining balance");
         }
       }
     }

@@ -45,10 +45,12 @@ public class TellerEntity {
   private String officeIdentifier;
   @Column(name = "cashdraw_limit", nullable = false)
   private BigDecimal cashdrawLimit;
-  @Column(name = "teller_account_identifier", nullable = false, length = 32)
+  @Column(name = "teller_account_identifier", nullable = false, length = 34)
   private String tellerAccountIdentifier;
-  @Column(name = "vault_account_identifier", nullable = false, length = 32)
+  @Column(name = "vault_account_identifier", nullable = false, length = 34)
   private String vaultAccountIdentifier;
+  @Column(name = "cheques_receivable_account", nullable = false, length = 34)
+  private String chequesReceivableAccount;
   @Column(name = "assigned_employee_identifier", nullable = true, length = 32)
   private String assignedEmployeeIdentifier;
   @Column(name = "a_state", nullable = false, length = 256)
@@ -130,6 +132,14 @@ public class TellerEntity {
 
   public void setVaultAccountIdentifier(final String vaultAccountIdentifier) {
     this.vaultAccountIdentifier = vaultAccountIdentifier;
+  }
+
+  public String getChequesReceivableAccount() {
+    return this.chequesReceivableAccount;
+  }
+
+  public void setChequesReceivableAccount(final String chequesReceivableAccount) {
+    this.chequesReceivableAccount = chequesReceivableAccount;
   }
 
   public String getAssignedEmployeeIdentifier() {
