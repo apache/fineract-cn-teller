@@ -18,6 +18,7 @@ package io.mifos.teller.api.v1.domain;
 import io.mifos.core.lang.validation.constraints.ValidIdentifier;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -42,14 +43,15 @@ public class TellerTransaction {
   private String productIdentifier;
   @ValidIdentifier(optional = true)
   private String productCaseIdentifier;
-  @ValidIdentifier
+  @ValidIdentifier(maxLength = 34)
   private String customerAccountIdentifier;
-  @ValidIdentifier(optional = true)
+  @ValidIdentifier(maxLength = 34, optional = true)
   private String targetAccountIdentifier;
   @ValidIdentifier
   private String clerk;
   @NotNull
-  @DecimalMin(value = "0.00", inclusive = false)
+  @DecimalMin(value = "0.000")
+  @DecimalMax(value = "9999999999.99999")
   private BigDecimal amount;
   private State state;
   @Valid

@@ -124,6 +124,7 @@ public class TellerAggregate {
 
         tellerEntity.setTellerAccountIdentifier(teller.getTellerAccountIdentifier());
         tellerEntity.setVaultAccountIdentifier(teller.getVaultAccountIdentifier());
+        tellerEntity.setChequesReceivableAccount(teller.getChequesReceivableAccount());
         tellerEntity.setCashdrawLimit(teller.getCashdrawLimit());
         tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
         tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
