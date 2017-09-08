@@ -21,6 +21,7 @@ import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
+import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
 import io.mifos.teller.api.v1.domain.Cheque;
 import io.mifos.teller.api.v1.domain.MICR;
@@ -633,5 +634,55 @@ public class TestTellerOperation extends AbstractTellerTest {
         super.eventRecorder.wait(EventConstants.CONFIRM_TRANSACTION,
             tellerTransactionCosts.getTellerTransactionIdentifier())
     );
+  }
+
+  @Test(expected = TellerTransactionValidationException.class)
+  public void shouldNotProcessChequeAlreadyUsed() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction chequeTransaction =  new TellerTransaction();
+    chequeTransaction.setTransactionType(ServiceConstants.TX_CHEQUE);
+    chequeTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    chequeTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setProductCaseIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    chequeTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    chequeTransaction.setAmount(BigDecimal.valueOf(246.80D));
+
+    final MICR micr = new MICR();
+    micr.setChequeNumber("0012");
+    micr.setBranchSortCode("08154711");
+    micr.setAccountNumber("4711");
+
+    final Cheque cheque = new Cheque();
+    cheque.setMicr(micr);
+    cheque.setDrawee("whatever Bank");
+    cheque.setDrawer("Jane Doe");
+    cheque.setPayee("John Doe");
+    cheque.setDateIssued(DateConverter.toIsoString(LocalDate.now(Clock.systemUTC())));
+    cheque.setAmount(BigDecimal.valueOf(246.80D));
+    cheque.setOpenCheque(Boolean.FALSE);
+    chequeTransaction.setCheque(cheque);
+
+    Mockito
+        .doAnswer(invocation -> {
+          final Account mockedAccount = new Account();
+          mockedAccount.setState(Account.State.OPEN.name());
+          return Optional.of(mockedAccount);
+        })
+        .when(super.accountingServiceSpy).findAccount(chequeTransaction.getCustomerAccountIdentifier());
+
+    super.testSubject.post(teller.getCode(), chequeTransaction);
+
+    super.testSubject.post(teller.getCode(), chequeTransaction);
   }
 }

@@ -17,6 +17,7 @@ package io.mifos.teller.service.internal.service.helper;
 
 import io.mifos.cheque.api.v1.client.ChequeManager;
 import io.mifos.cheque.api.v1.domain.ChequeTransaction;
+import io.mifos.core.api.util.NotFoundException;
 import io.mifos.teller.ServiceConstants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,5 +40,14 @@ public class ChequeService {
 
   public void process(final ChequeTransaction chequeTransaction) {
     this.chequeManager.process(chequeTransaction);
+  }
+
+  public boolean chequeExists(final String identifier) {
+    try {
+      this.chequeManager.get(identifier);
+      return true;
+    } catch (final NotFoundException nfex) {
+      return false;
+    }
   }
 }
