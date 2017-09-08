@@ -36,6 +36,8 @@ import io.mifos.teller.service.internal.command.PauseTellerCommand;
 import io.mifos.teller.service.internal.service.TellerManagementService;
 import io.mifos.teller.service.internal.service.TellerOperationService;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
+import io.mifos.teller.service.internal.service.helper.ChequeService;
+import io.mifos.teller.service.internal.util.MICRParser;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,18 +67,21 @@ public class TellerOperationRestController {
   private final TellerOperationService tellerOperationService;
   private final TellerManagementService tellerManagementService;
   private final AccountingService accountingService;
+  private final ChequeService chequeService;
 
   @Autowired
   public TellerOperationRestController(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                                        final CommandGateway commandGateway,
                                        final TellerOperationService tellerOperationService,
                                        final TellerManagementService tellerManagementService,
-                                       final AccountingService accountingService) {
+                                       final AccountingService accountingService,
+                                       final ChequeService chequeService) {
     this.logger = logger;
     this.commandGateway = commandGateway;
     this.tellerOperationService = tellerOperationService;
     this.tellerManagementService = tellerManagementService;
     this.accountingService = accountingService;
+    this.chequeService = chequeService;
   }
 
   @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_OPERATION)
@@ -174,6 +179,11 @@ public class TellerOperationRestController {
       final LocalDate sixMonth = LocalDate.now(Clock.systemUTC()).minusMonths(6);
       if (dateIssued.isBefore(sixMonth)) {
         throw ServiceException.conflict("Cheque is older than 6 month.");
+      }
+
+      final String chequeIdentifier = MICRParser.toIdentifier(tellerTransaction.getCheque().getMicr());
+      if (this.chequeService.chequeExists(chequeIdentifier)) {
+        throw ServiceException.conflict("Cheque {0} already used.", chequeIdentifier);
       }
     }
 
