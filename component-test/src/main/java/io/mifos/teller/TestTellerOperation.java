@@ -433,6 +433,8 @@ public class TestTellerOperation extends AbstractTellerTest {
 
       Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, TestTellerOperation.tellerUnderTest.getCode()));
 
+      Mockito.verify(this.organizationServiceSpy, Mockito.times(1)).setTellerReference(Matchers.eq(officeIdentifier));
+
       final TellerManagementCommand command = new TellerManagementCommand();
       command.setAction(TellerManagementCommand.Action.OPEN.name());
       command.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
