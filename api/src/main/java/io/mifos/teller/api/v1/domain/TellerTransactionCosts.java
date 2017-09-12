@@ -23,7 +23,7 @@ import java.util.List;
 public class TellerTransactionCosts {
 
   private String tellerTransactionIdentifier;
-  @DecimalMin(value = "0.001")
+  @DecimalMin(value = "0.000")
   @DecimalMax(value = "9999999999.99999")
   private BigDecimal totalAmount;
   private List<Charge> charges;
