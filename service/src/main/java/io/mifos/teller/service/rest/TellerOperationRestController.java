@@ -178,7 +178,7 @@ public class TellerOperationRestController {
       final LocalDate dateIssued = DateConverter.dateFromIsoString(tellerTransaction.getCheque().getDateIssued());
       final LocalDate sixMonth = LocalDate.now(Clock.systemUTC()).minusMonths(6);
       if (dateIssued.isBefore(sixMonth)) {
-        throw ServiceException.conflict("Cheque is older than 6 month.");
+        throw ServiceException.conflict("Cheque is older than 6 months.");
       }
 
       final String chequeIdentifier = MICRParser.toIdentifier(tellerTransaction.getCheque().getMicr());
