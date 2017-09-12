@@ -83,10 +83,13 @@ public class DepositTransactionHandler {
   public void processTransfer(final String tellerCode, final TellerTransaction tellerTransaction,
                               final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
-
     final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
+    if (tellerTransactionCosts.getTotalAmount().compareTo(BigDecimal.ZERO) ==0) {
+      return;
+    }
+
+    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
@@ -116,11 +119,16 @@ public class DepositTransactionHandler {
     this.accountingService.postJournalEntry(journalEntry);
   }
 
-  public void processCashDeposit(final String tellerCode, final TellerTransaction tellerTransaction, final boolean chargesIncluded) {
+  public void processCashDeposit(final String tellerCode, final TellerTransaction tellerTransaction,
+                                 final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
+    if (tellerTransactionCosts.getTotalAmount().compareTo(BigDecimal.ZERO) == 0) {
+      return;
+    }
+
+    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
@@ -152,9 +160,13 @@ public class DepositTransactionHandler {
   public void processCashWithdrawal(final String tellerCode, final TellerTransaction tellerTransaction,
                                     final boolean chargesIncluded) {
     final TellerEntity tellerEntity = getTellerEntity(tellerCode);
-    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final TellerTransactionCosts tellerTransactionCosts = this.getTellerTransactionCosts(tellerTransaction);
 
+    if (tellerTransactionCosts.getTotalAmount().compareTo(BigDecimal.ZERO) == 0) {
+      return;
+    }
+
+    final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
@@ -185,7 +197,7 @@ public class DepositTransactionHandler {
   }
 
   public void processDepositAccountClosing(final String tellerCode, final TellerTransaction tellerTransaction,
-                                            final boolean chargesIncluded) {
+                                           final boolean chargesIncluded) {
     this.processCashWithdrawal(tellerCode, tellerTransaction, chargesIncluded);
 
     this.depositAccountManagementService.closeProductInstance(tellerTransaction.getCustomerAccountIdentifier());
