@@ -17,6 +17,7 @@ package io.mifos.teller.service.internal.service.helper;
 
 import io.mifos.office.api.v1.client.NotFoundException;
 import io.mifos.office.api.v1.client.OrganizationManager;
+import io.mifos.office.api.v1.domain.ExternalReference;
 import io.mifos.teller.ServiceConstants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +56,12 @@ public class OrganizationService {
       this.logger.warn("Employee {} not found.", employeeIdentifier);
       return false;
     }
+  }
+
+  public void setTellerReference(final String officeIdentifier) {
+    final ExternalReference externalReference = new ExternalReference();
+    externalReference.setType("fineract.teller");
+    externalReference.setState(ExternalReference.State.ACTIVE.name());
+    this.organizationManager.addExternalReference(officeIdentifier, externalReference);
   }
 }

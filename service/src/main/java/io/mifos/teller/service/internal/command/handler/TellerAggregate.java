@@ -100,6 +100,8 @@ public class TellerAggregate {
 
       this.tellerRepository.save(tellerEntity);
 
+      this.organizationService.setTellerReference(officeIdentifier);
+
       return teller.getCode();
     } else {
       throw new IllegalStateException("Preconditions not met, see log file for further information.");
