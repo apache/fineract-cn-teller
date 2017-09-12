@@ -497,6 +497,47 @@ public class TestTellerManagement extends AbstractTellerTest {
     super.testSubject.create(officeIdentifier, teller);
   }
 
+  @Test
+  public void shouldCloseTellerEvenCashDrawLimitExceeding() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(1000.00D));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+
+    super.testSubject.create(officeIdentifier, teller);
+
+    super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode());
+
+    final TellerManagementCommand openCommand = new TellerManagementCommand();
+    openCommand.setAction(TellerManagementCommand.Action.OPEN.name());
+    openCommand.setAdjustment(TellerManagementCommand.Adjustment.DEBIT.name());
+    openCommand.setAmount(BigDecimal.valueOf(1100.00D));
+    openCommand.setAssignedEmployeeIdentifier(RandomStringUtils.randomAlphanumeric(32));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).employeeExists(Matchers.eq(openCommand.getAssignedEmployeeIdentifier()));
+
+    super.testSubject.post(officeIdentifier, teller.getCode(), openCommand);
+
+    super.eventRecorder.wait(EventConstants.OPEN_TELLER, teller.getCode());
+
+    final TellerManagementCommand closeCommand = new TellerManagementCommand();
+    closeCommand.setAction(TellerManagementCommand.Action.CLOSE.name());
+    closeCommand.setAdjustment(TellerManagementCommand.Adjustment.CREDIT.name());
+    closeCommand.setAmount(BigDecimal.valueOf(1100.00D));
+
+    super.testSubject.post(officeIdentifier, teller.getCode(), closeCommand);
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.CLOSE_TELLER, teller.getCode()));
+  }
+
   private void compareTeller(final Teller expected, final Teller actual) {
     Assert.assertEquals(expected.getCode(), actual.getCode());
     Assert.assertEquals(expected.getTellerAccountIdentifier(), actual.getTellerAccountIdentifier());

@@ -299,13 +299,6 @@ public class TellerAggregate {
   }
 
   private JournalEntry createJournalEntry(final TellerEntity tellerEntity, final TellerManagementCommand tellerManagementCommand) {
-
-    if (tellerManagementCommand.getAmount().compareTo(tellerEntity.getCashdrawLimit()) > 0) {
-      this.logger.warn("Adjustment {} exceeds cashdraw limit {}.", tellerManagementCommand.getAmount(),
-          tellerEntity.getCashdrawLimit());
-      throw new IllegalArgumentException("Adjustment exceeds cashdraw limit.");
-    }
-
     final JournalEntry journalEntry = new JournalEntry();
     journalEntry.setTransactionIdentifier(RandomStringUtils.randomNumeric(32));
     journalEntry.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
