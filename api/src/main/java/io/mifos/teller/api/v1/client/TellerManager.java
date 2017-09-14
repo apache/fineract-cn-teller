@@ -184,4 +184,17 @@ public interface TellerManager {
   })
   List<TellerTransaction> fetch(@PathVariable("tellerCode") final String tellerCode,
                                 @RequestParam(value = "status", required = false) final String status);
+
+  @RequestMapping(
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}",
+      method = RequestMethod.DELETE,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.ALL_VALUE
+  )
+  @ThrowsExceptions({
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerValidationException.class)
+  })
+  void deleteTeller(@PathVariable("officeIdentifier") final String officeIdentifier,
+                    @PathVariable("tellerCode") final String tellerCode);
 }

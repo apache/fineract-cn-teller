@@ -27,6 +27,7 @@ import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
+import io.mifos.teller.service.internal.command.DeleteTellerCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
 import io.mifos.teller.service.internal.service.TellerManagementService;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
@@ -202,6 +203,28 @@ public class TellerManagementRestController {
     this.verifyTeller(tellerCode);
 
     return ResponseEntity.ok(this.tellerManagementService.getBalance(tellerCode));
+  }
+
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_MANAGEMENT)
+  @RequestMapping(
+      value = "/{tellerCode}",
+      method = RequestMethod.DELETE,
+      consumes = MediaType.ALL_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public
+  @ResponseBody
+  ResponseEntity<Void> deleteTeller(@PathVariable("officeIdentifier") final String officeIdentifier,
+                                    @PathVariable("tellerCode") final String tellerCode) {
+    this.verifyOffice(officeIdentifier);
+    final Teller teller = this.verifyTeller(tellerCode);
+    if (teller.getLastOpenedBy() != null) {
+      throw ServiceException.conflict("Teller {0} already used.", tellerCode);
+    }
+
+    this.commandGateway.process(new DeleteTellerCommand(tellerCode));
+
+    return ResponseEntity.accepted().build();
   }
 
   private void verifyAccount(final String accountIdentifier) {

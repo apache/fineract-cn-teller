@@ -538,6 +538,64 @@ public class TestTellerManagement extends AbstractTellerTest {
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.CLOSE_TELLER, teller.getCode()));
   }
 
+  @Test
+  public void shouldDeleteTeller() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(10000.00D));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+
+    super.testSubject.create(officeIdentifier, teller);
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
+
+    final Teller fetchedTeller = this.testSubject.find(officeIdentifier, teller.getCode());
+    Assert.assertTrue(fetchedTeller.getLastOpenedBy() == null);
+
+    super.testSubject.deleteTeller(officeIdentifier, teller.getCode());
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.DELETE_TELLER, teller.getCode()));
+  }
+
+  @Test(expected = TellerValidationException.class)
+  public void shouldNotDeleteTeller() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(10000.00D));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+
+    super.testSubject.create(officeIdentifier, teller);
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
+
+    final TellerManagementCommand openCommand = new TellerManagementCommand();
+    openCommand.setAction(TellerManagementCommand.Action.OPEN.name());
+    openCommand.setAdjustment(TellerManagementCommand.Adjustment.NONE.name());
+    openCommand.setAssignedEmployeeIdentifier(RandomStringUtils.randomAlphanumeric(32));
+
+    this.testSubject.post(officeIdentifier, teller.getCode(), openCommand);
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.OPEN_TELLER, teller.getCode()));
+
+    final Teller fetchedTeller = this.testSubject.find(officeIdentifier, teller.getCode());
+    Assert.assertTrue(fetchedTeller.getLastOpenedBy() != null);
+
+    super.testSubject.deleteTeller(officeIdentifier, teller.getCode());
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.DELETE_TELLER, teller.getCode()));
+  }
+
   private void compareTeller(final Teller expected, final Teller actual) {
     Assert.assertEquals(expected.getCode(), actual.getCode());
     Assert.assertEquals(expected.getTellerAccountIdentifier(), actual.getTellerAccountIdentifier());

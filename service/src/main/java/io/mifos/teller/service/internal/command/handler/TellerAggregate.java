@@ -33,6 +33,7 @@ import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
+import io.mifos.teller.service.internal.command.DeleteTellerCommand;
 import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
 import io.mifos.teller.service.internal.command.PauseTellerCommand;
@@ -165,6 +166,8 @@ public class TellerAggregate {
         tellerEntity.setState(Teller.State.OPEN.name());
         tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
         tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
+        tellerEntity.setLastOpenedBy(tellerEntity.getLastModifiedBy());
+        tellerEntity.setLastOpenedOn(tellerEntity.getLastModifiedOn());
 
         this.tellerRepository.save(tellerEntity);
         return tellerCode;
@@ -264,6 +267,27 @@ public class TellerAggregate {
         return tellerCode;
       } else {
         this.logger.warn("Unable to pause teller {}.", tellerCode);
+      }
+    } else {
+      this.logger.warn("Teller {} not found.", tellerCode);
+    }
+    return null;
+  }
+
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.DELETE_TELLER)
+  public String process(final DeleteTellerCommand deleteTellerCommand) {
+    final String tellerCode = deleteTellerCommand.tellerCode();
+
+    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
+    if (optionalTeller.isPresent()) {
+      final TellerEntity tellerEntity = optionalTeller.get();
+      if (tellerEntity.getLastOpenedBy() == null) {
+        this.tellerRepository.delete(tellerEntity);
+        return tellerCode;
+      } else {
+        this.logger.warn("Could not close teller {}, already used.", tellerCode);
       }
     } else {
       this.logger.warn("Teller {} not found.", tellerCode);
