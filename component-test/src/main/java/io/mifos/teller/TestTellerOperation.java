@@ -241,7 +241,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
-    super.testSubject.post(teller.getCode(), tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), tellerTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", null);
   }
 
   @Test
@@ -266,13 +268,18 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
     tellerTransaction.setAmount(commonAmount);
 
-    final Account account = new Account();
-    account.setBalance(2000.00D);
-    account.setState(Account.State.OPEN.name());
-    Mockito.doAnswer(invocation -> Optional.of(account))
+    final Account customerAccount = new Account();
+    customerAccount.setBalance(2000.00D);
+    customerAccount.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(customerAccount))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
-    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+
+    final Account targetAccount = new Account();
+    targetAccount.setBalance(2000.00D);
+    targetAccount.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(targetAccount))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getTargetAccountIdentifier());
+
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
@@ -379,7 +386,9 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
 
-    super.testSubject.post(teller.getCode(), tellerTransaction);
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), tellerTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", null);
   }
 
   @Test(expected = TransactionProcessingException.class)
@@ -609,6 +618,14 @@ public class TestTellerOperation extends AbstractTellerTest {
     micr.setBranchSortCode("08154711");
     micr.setAccountNumber("4711");
 
+    Mockito
+        .doAnswer(invocation -> {
+          final Account mockedAccount = new Account();
+          mockedAccount.setState(Account.State.OPEN.name());
+          return Optional.of(mockedAccount);
+        })
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(micr.getAccountNumber()));
+
     final Cheque cheque = new Cheque();
     cheque.setMicr(micr);
     cheque.setDrawee("whatever Bank");
@@ -664,6 +681,14 @@ public class TestTellerOperation extends AbstractTellerTest {
     micr.setChequeNumber("0012");
     micr.setBranchSortCode("08154711");
     micr.setAccountNumber("4711");
+
+    Mockito
+        .doAnswer(invocation -> {
+          final Account mockedAccount = new Account();
+          mockedAccount.setState(Account.State.OPEN.name());
+          return Optional.of(mockedAccount);
+        })
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(micr.getAccountNumber()));
 
     final Cheque cheque = new Cheque();
     cheque.setMicr(micr);

@@ -165,7 +165,8 @@ public interface TellerManager {
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   @ThrowsExceptions({
-      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class)
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TransactionProcessingException.class)
   })
   void confirm(@PathVariable("tellerCode") final String tellerCode,
                @PathVariable("identifier") final String tellerTransactionIdentifier,
