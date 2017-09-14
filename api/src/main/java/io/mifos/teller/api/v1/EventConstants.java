@@ -37,6 +37,8 @@ public interface EventConstants {
   String SELECTOR_ACTIVATE_TELLER = SELECTOR_NAME + " = '" + ACTIVATE_TELLER + "'";
   String PAUSE_TELLER = "pause-teller";
   String SELECTOR_PAUSE_TELLER = SELECTOR_NAME + " = '" + PAUSE_TELLER + "'";
+  String DELETE_TELLER = "delete-teller";
+  String SELECTOR_DELETE_TELLER = SELECTOR_NAME + " = '" + DELETE_TELLER + "'";
 
   String INIT_TRANSACTION = "init-transaction";
   String SELECTOR_INIT_TRANSACTION = SELECTOR_NAME + " = '" + INIT_TRANSACTION + "'";

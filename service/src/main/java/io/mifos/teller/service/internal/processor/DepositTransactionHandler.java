@@ -167,13 +167,24 @@ public class DepositTransactionHandler {
     }
 
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
+
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
-    final Debtor customerDebtor = new Debtor();
-    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
-    customerDebtor.setAmount(tellerTransaction.getAmount().toString());
-    debtors.add(customerDebtor);
+    final HashSet<Creditor> creditors = new HashSet<>();
+    journalEntry.setCreditors(creditors);
+
+    if (tellerTransaction.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+      final Debtor customerDebtor = new Debtor();
+      customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+      customerDebtor.setAmount(tellerTransaction.getAmount().toString());
+      debtors.add(customerDebtor);
+
+      final Creditor tellerCreditor = new Creditor();
+      tellerCreditor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
+      tellerCreditor.setAmount(tellerTransaction.getAmount().toString());
+      creditors.add(tellerCreditor);
+    }
 
     if (!tellerTransactionCosts.getCharges().isEmpty()) {
       if (chargesIncluded) {
@@ -182,14 +193,6 @@ public class DepositTransactionHandler {
         debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
       }
     }
-
-    final HashSet<Creditor> creditors = new HashSet<>();
-    journalEntry.setCreditors(creditors);
-
-    final Creditor tellerCreditor = new Creditor();
-    tellerCreditor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
-    tellerCreditor.setAmount(tellerTransaction.getAmount().toString());
-    creditors.add(tellerCreditor);
 
     creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
 

@@ -114,4 +114,14 @@ public class TellerEventListener {
     this.logger.debug("Teller {} created.", payload);
     this.eventRecorder.event(tenant, EventConstants.CONFIRM_TRANSACTION, payload, String.class);
   }
-}
+
+  @JmsListener(
+      destination = EventConstants.DESTINATION,
+      selector = EventConstants.SELECTOR_DELETE_TELLER,
+      subscription = EventConstants.DESTINATION
+  )
+  public void onDeleteTeller(@Header(TenantHeaderFilter.TENANT_HEADER) final String tenant,
+                             final String payload) {
+    this.logger.debug("Teller {} created.", payload);
+    this.eventRecorder.event(tenant, EventConstants.DELETE_TELLER, payload, String.class);
+  }}

@@ -24,6 +24,7 @@ import io.mifos.teller.service.internal.repository.ChequeEntity;
 import io.mifos.teller.service.internal.repository.ChequeRepository;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
+import io.mifos.teller.service.internal.repository.TellerTransactionEntity;
 import io.mifos.teller.service.internal.repository.TellerTransactionRepository;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,21 @@ public class TellerOperationService {
     this.chequeRepository = chequeRepository;
   }
 
-  public boolean tellerTransactionExists(final String tellerTransactionIdentifier) {
-    return this.tellerTransactionRepository.findByIdentifier(tellerTransactionIdentifier).isPresent();
+  public Optional<TellerTransaction> getTellerTransaction(final String tellerTransactionIdentifier) {
+
+    final Optional<TellerTransactionEntity> optionalTellerTransaction =
+        this.tellerTransactionRepository.findByIdentifier(tellerTransactionIdentifier);
+
+    return optionalTellerTransaction.map(tellerTransactionEntity -> {
+      final TellerTransaction tellerTransaction = TellerTransactionMapper.map(tellerTransactionEntity);
+      if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+        final Optional<ChequeEntity> optionalCheque =
+            this.chequeRepository.findByTellerTransactionId(tellerTransactionEntity.getId());
+
+        optionalCheque.ifPresent(chequeEntity -> tellerTransaction.setCheque(ChequeMapper.map(chequeEntity)));
+      }
+      return tellerTransaction;
+    });
   }
 
   public List<TellerTransaction> fetchTellerTransactions(final String tellerCode, final String state) {

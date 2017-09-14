@@ -24,6 +24,7 @@ import io.mifos.core.lang.DateConverter;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
+import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
@@ -33,6 +34,7 @@ import io.mifos.teller.service.internal.command.ConfirmTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.InitializeTellerTransactionCommand;
 import io.mifos.teller.service.internal.command.PauseTellerCommand;
+import io.mifos.teller.service.internal.processor.TellerTransactionProcessor;
 import io.mifos.teller.service.internal.service.TellerManagementService;
 import io.mifos.teller.service.internal.service.TellerOperationService;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
@@ -68,6 +70,7 @@ public class TellerOperationRestController {
   private final TellerManagementService tellerManagementService;
   private final AccountingService accountingService;
   private final ChequeService chequeService;
+  private final TellerTransactionProcessor tellerTransactionProcessor;
 
   @Autowired
   public TellerOperationRestController(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
@@ -75,13 +78,15 @@ public class TellerOperationRestController {
                                        final TellerOperationService tellerOperationService,
                                        final TellerManagementService tellerManagementService,
                                        final AccountingService accountingService,
-                                       final ChequeService chequeService) {
+                                       final ChequeService chequeService,
+                                       final TellerTransactionProcessor tellerTransactionProcessor) {
     this.logger = logger;
     this.commandGateway = commandGateway;
     this.tellerOperationService = tellerOperationService;
     this.tellerManagementService = tellerManagementService;
     this.accountingService = accountingService;
     this.chequeService = chequeService;
+    this.tellerTransactionProcessor = tellerTransactionProcessor;
   }
 
   @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_OPERATION)
@@ -174,6 +179,8 @@ public class TellerOperationRestController {
       }
     }
 
+    this.verifyAccounts(tellerTransaction);
+
     if (transactionType.equals(ServiceConstants.TX_CHEQUE)) {
       final LocalDate dateIssued = DateConverter.dateFromIsoString(tellerTransaction.getCheque().getDateIssued());
       final LocalDate sixMonth = LocalDate.now(Clock.systemUTC()).minusMonths(6);
@@ -181,43 +188,11 @@ public class TellerOperationRestController {
         throw ServiceException.conflict("Cheque is older than 6 months.");
       }
 
-      final String chequeIdentifier = MICRParser.toIdentifier(tellerTransaction.getCheque().getMicr());
+      final MICR micr = tellerTransaction.getCheque().getMicr();
+      final String chequeIdentifier = MICRParser.toIdentifier(micr);
       if (this.chequeService.chequeExists(chequeIdentifier)) {
         throw ServiceException.conflict("Cheque {0} already used.", chequeIdentifier);
       }
-    }
-
-    final Optional<Account> optionalCustomerAccount =
-        this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier());
-    if (!optionalCustomerAccount.isPresent()) {
-      throw ServiceException.badRequest("Customer account {0} not found.");
-    } else {
-      final Account customerAccount = optionalCustomerAccount.get();
-
-      if (!customerAccount.getState().equals(Account.State.OPEN.name())) {
-        throw ServiceException.conflict("Account {0} is not open.", customerAccount.getIdentifier());
-      }
-
-      if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
-          || transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
-          || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
-        if (tellerTransaction.getAmount().compareTo(BigDecimal.valueOf(customerAccount.getBalance())) > 0 ) {
-          throw ServiceException.conflict("Not enough balance.");
-        }
-      }
-
-      if (transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
-        final BigDecimal newBalance =
-            BigDecimal.valueOf(customerAccount.getBalance()).subtract(tellerTransaction.getAmount());
-        if (newBalance.compareTo(BigDecimal.ZERO) > 0) {
-          throw ServiceException.conflict("Account has remaining balance");
-        }
-      }
-    }
-
-    if (tellerTransaction.getTargetAccountIdentifier() != null &&
-        !this.accountingService.findAccount(tellerTransaction.getTargetAccountIdentifier()).isPresent()) {
-      throw ServiceException.badRequest("Target account {0} not found.");
     }
 
     try {
@@ -246,13 +221,19 @@ public class TellerOperationRestController {
 
     this.verifyEmployee(teller);
 
-    if (!this.tellerOperationService.tellerTransactionExists(tellerTransactionIdentifier)) {
-      throw ServiceException.notFound("Transaction {0} not found.", tellerTransactionIdentifier);
-    }
-
     switch (command.toUpperCase()) {
       case "CONFIRM" :
-        this.commandGateway.process(new ConfirmTellerTransactionCommand(tellerTransactionIdentifier, charges));
+        final ConfirmTellerTransactionCommand confirmTellerTransactionCommand =
+            new ConfirmTellerTransactionCommand(tellerTransactionIdentifier, charges);
+
+        final TellerTransaction tellerTransaction =
+            this.tellerOperationService.getTellerTransaction(tellerTransactionIdentifier)
+                .orElseThrow(() -> ServiceException.notFound("Transaction {0} not found.", tellerTransactionIdentifier));
+
+        this.verifyAccounts(tellerTransaction);
+        this.verifyWithdrawalTransaction(tellerTransactionIdentifier, confirmTellerTransactionCommand);
+
+        this.commandGateway.process(confirmTellerTransactionCommand);
         break;
       case "CANCEL" :
         this.commandGateway.process(new CancelTellerTransactionCommand(tellerTransactionIdentifier));
@@ -293,6 +274,63 @@ public class TellerOperationRestController {
     final String currentUser = UserContextHolder.checkedGetUser();
     if (!currentUser.equals(teller.getAssignedEmployee())) {
       throw ServiceException.badRequest("User {0} is not assigned to teller {1}", currentUser, teller.getCode());
+    }
+  }
+
+  private void verifyAccounts(final TellerTransaction tellerTransaction) {
+    this.verifyAccount(tellerTransaction.getCustomerAccountIdentifier());
+
+    if (tellerTransaction.getTargetAccountIdentifier() != null) {
+      this.verifyAccount(tellerTransaction.getTargetAccountIdentifier());
+    }
+
+    if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+      final MICR micr = tellerTransaction.getCheque().getMicr();
+      this.verifyAccount(micr.getAccountNumber());
+    }
+  }
+
+  private void verifyAccount(final String accountIdentifier) {
+    final Account account = this.accountingService.findAccount(accountIdentifier).orElseThrow(
+        () -> ServiceException.conflict("Account {0} not found."));
+
+    if (!account.getState().equals(Account.State.OPEN.name())) {
+      throw ServiceException.conflict("Account {0} is not open.", account.getIdentifier());
+    }
+  }
+
+  private void verifyWithdrawalTransaction(final String tellerTransactionIdentifier,
+                                           final ConfirmTellerTransactionCommand confirmTellerTransactionCommand) {
+
+    final TellerTransaction tellerTransaction =
+        this.tellerOperationService.getTellerTransaction(tellerTransactionIdentifier)
+            .orElseThrow(() -> ServiceException.notFound("Transaction {0} not found.", tellerTransactionIdentifier));
+
+    final String transactionType = tellerTransaction.getTransactionType();
+
+    if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
+        || transactionType.equals(ServiceConstants.TX_CASH_WITHDRAWAL)
+        || transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
+
+      final Account account = this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier()).orElseThrow(
+          () -> ServiceException.notFound("Customer account {0} not found.", tellerTransaction.getCustomerAccountIdentifier()));
+      final BigDecimal currentBalance = BigDecimal.valueOf(account.getBalance());
+
+      final TellerTransactionCosts tellerTransactionCosts =
+          this.tellerTransactionProcessor.getCosts(tellerTransaction);
+      final BigDecimal transactionAmount = confirmTellerTransactionCommand.chargesIncluded()
+          ? tellerTransactionCosts.getTotalAmount()
+          : tellerTransaction.getAmount();
+
+      if (transactionAmount.compareTo(currentBalance) > 0) {
+        throw ServiceException.conflict("Account has not enough balance.");
+      }
+
+      if (transactionType.equals(ServiceConstants.TX_CLOSE_ACCOUNT)) {
+        if (currentBalance.compareTo(transactionAmount) > 0) {
+          throw ServiceException.conflict("Account has remaining balance.");
+        }
+      }
     }
   }
 }

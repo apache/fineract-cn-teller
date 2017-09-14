@@ -66,6 +66,12 @@ public class TellerEntity {
   @Convert(converter = LocalDateTimeConverter.class)
   private LocalDateTime lastModifiedOn;
 
+  @Column(name = "last_opened_by", nullable = true, length = 32)
+  private String lastOpenedBy;
+  @Column(name = "last_opened_on", nullable = true)
+  @Convert(converter = LocalDateTimeConverter.class)
+  private LocalDateTime lastOpenedOn;
+
   public TellerEntity() {
     super();
   }
@@ -188,5 +194,21 @@ public class TellerEntity {
 
   public void setLastModifiedOn(final LocalDateTime lastModifiedOn) {
     this.lastModifiedOn = lastModifiedOn;
+  }
+
+  public String getLastOpenedBy() {
+    return this.lastOpenedBy;
+  }
+
+  public void setLastOpenedBy(final String lastOpenedBy) {
+    this.lastOpenedBy = lastOpenedBy;
+  }
+
+  public LocalDateTime getLastOpenedOn() {
+    return this.lastOpenedOn;
+  }
+
+  public void setLastOpenedOn(final LocalDateTime lastOpenedOn) {
+    this.lastOpenedOn = lastOpenedOn;
   }
 }

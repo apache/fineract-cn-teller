@@ -50,6 +50,8 @@ public class Teller {
   private String createdOn;
   private String lastModifiedBy;
   private String lastModifiedOn;
+  private String lastOpenedBy;
+  private String lastOpenedOn;
 
   public Teller() {
     super();
@@ -153,5 +155,21 @@ public class Teller {
 
   public void setLastModifiedOn(final String lastModifiedOn) {
     this.lastModifiedOn = lastModifiedOn;
+  }
+
+  public String getLastOpenedBy() {
+    return this.lastOpenedBy;
+  }
+
+  public void setLastOpenedBy(final String lastOpenedBy) {
+    this.lastOpenedBy = lastOpenedBy;
+  }
+
+  public String getLastOpenedOn() {
+    return this.lastOpenedOn;
+  }
+
+  public void setLastOpenedOn(final String lastOpenedOn) {
+    this.lastOpenedOn = lastOpenedOn;
   }
 }

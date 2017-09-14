@@ -42,6 +42,10 @@ public class TellerMapper {
       teller.setLastModifiedBy(tellerEntity.getLastModifiedBy());
       teller.setLastModifiedOn(DateConverter.toIsoString(tellerEntity.getLastModifiedOn()));
     }
+    if (tellerEntity.getLastOpenedBy() != null) {
+      teller.setLastOpenedBy(tellerEntity.getLastOpenedBy());
+      teller.setLastOpenedOn(DateConverter.toIsoString(tellerEntity.getLastOpenedOn()));
+    }
 
     return teller;
   }
@@ -67,6 +71,11 @@ public class TellerMapper {
       tellerEntity.setLastModifiedBy(teller.getLastModifiedBy());
       tellerEntity.setLastModifiedOn(DateConverter.fromIsoString(teller.getLastModifiedOn()));
     }
+    if (teller.getLastOpenedBy() != null) {
+      tellerEntity.setLastOpenedBy(teller.getLastOpenedBy());
+      tellerEntity.setLastOpenedOn(DateConverter.fromIsoString(teller.getLastOpenedOn()));
+    }
+
     return tellerEntity;
   }
 }
