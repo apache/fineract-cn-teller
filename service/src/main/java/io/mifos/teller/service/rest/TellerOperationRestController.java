@@ -39,6 +39,7 @@ import io.mifos.teller.service.internal.service.TellerManagementService;
 import io.mifos.teller.service.internal.service.TellerOperationService;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.ChequeService;
+import io.mifos.teller.service.internal.service.helper.OrganizationService;
 import io.mifos.teller.service.internal.util.MICRParser;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,7 @@ public class TellerOperationRestController {
   private final AccountingService accountingService;
   private final ChequeService chequeService;
   private final TellerTransactionProcessor tellerTransactionProcessor;
+  private final OrganizationService organizationService;
 
   @Autowired
   public TellerOperationRestController(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
@@ -79,7 +81,8 @@ public class TellerOperationRestController {
                                        final TellerManagementService tellerManagementService,
                                        final AccountingService accountingService,
                                        final ChequeService chequeService,
-                                       final TellerTransactionProcessor tellerTransactionProcessor) {
+                                       final TellerTransactionProcessor tellerTransactionProcessor,
+                                       final OrganizationService organizationService) {
     this.logger = logger;
     this.commandGateway = commandGateway;
     this.tellerOperationService = tellerOperationService;
@@ -87,6 +90,7 @@ public class TellerOperationRestController {
     this.accountingService = accountingService;
     this.chequeService = chequeService;
     this.tellerTransactionProcessor = tellerTransactionProcessor;
+    this.organizationService = organizationService;
   }
 
   @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_OPERATION)
@@ -286,16 +290,18 @@ public class TellerOperationRestController {
 
     if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
       final MICR micr = tellerTransaction.getCheque().getMicr();
-      this.verifyAccount(micr.getAccountNumber());
+      if (this.organizationService.officeExists(micr.getBranchSortCode())) {
+        this.verifyAccount(micr.getAccountNumber());
+      }
     }
   }
 
   private void verifyAccount(final String accountIdentifier) {
     final Account account = this.accountingService.findAccount(accountIdentifier).orElseThrow(
-        () -> ServiceException.conflict("Account {0} not found."));
+        () -> ServiceException.conflict("Account {0} not found.", accountIdentifier));
 
     if (!account.getState().equals(Account.State.OPEN.name())) {
-      throw ServiceException.conflict("Account {0} is not open.", account.getIdentifier());
+      throw ServiceException.conflict("Account {0} is not open.", accountIdentifier);
     }
   }
 
@@ -314,13 +320,14 @@ public class TellerOperationRestController {
 
       final Account account = this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier()).orElseThrow(
           () -> ServiceException.notFound("Customer account {0} not found.", tellerTransaction.getCustomerAccountIdentifier()));
+
       final BigDecimal currentBalance = BigDecimal.valueOf(account.getBalance());
 
       final TellerTransactionCosts tellerTransactionCosts =
           this.tellerTransactionProcessor.getCosts(tellerTransaction);
       final BigDecimal transactionAmount = confirmTellerTransactionCommand.chargesIncluded()
-          ? tellerTransactionCosts.getTotalAmount()
-          : tellerTransaction.getAmount();
+          ? tellerTransaction.getAmount()
+          : tellerTransactionCosts.getTotalAmount();
 
       if (transactionAmount.compareTo(currentBalance) > 0) {
         throw ServiceException.conflict("Account has not enough balance.");

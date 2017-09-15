@@ -15,6 +15,7 @@
  */
 package io.mifos.teller;
 
+import com.google.common.collect.Lists;
 import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
@@ -23,6 +24,7 @@ import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
 import io.mifos.teller.api.v1.client.TransactionProcessingException;
+import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.Cheque;
 import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.api.v1.domain.Teller;
@@ -711,5 +713,83 @@ public class TestTellerOperation extends AbstractTellerTest {
     super.testSubject.post(teller.getCode(), chequeTransaction);
 
     super.testSubject.post(teller.getCode(), chequeTransaction);
+  }
+
+  @Test(expected = TransactionProcessingException.class)
+  public void shouldNotWithdrawExcludingCharges() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CASH_WITHDRAWAL);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(BigDecimal.valueOf(2000.00D));
+
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+
+    final Charge charge = new Charge();
+    charge.setAmount(BigDecimal.valueOf(15.00D));
+    Mockito.doAnswer(invocation -> Lists.newArrayList(charge))
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.any(TellerTransaction.class));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), tellerTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", null);
+  }
+
+  @Test
+  public void shouldWithdrawIncludingCharges() throws Exception {
+    final Teller teller = this.prepareTeller();
+
+    final UnlockDrawerCommand unlockDrawerCommand = new UnlockDrawerCommand();
+    unlockDrawerCommand.setEmployeeIdentifier(AbstractTellerTest.TEST_USER);
+    unlockDrawerCommand.setPassword(teller.getPassword());
+
+    super.testSubject.unlockDrawer(teller.getCode(), unlockDrawerCommand);
+
+    super.eventRecorder.wait(EventConstants.AUTHENTICATE_TELLER, teller.getCode());
+
+    final TellerTransaction tellerTransaction =  new TellerTransaction();
+    tellerTransaction.setTransactionType(ServiceConstants.TX_CASH_WITHDRAWAL);
+    tellerTransaction.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+    tellerTransaction.setProductIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerAccountIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setCustomerIdentifier(RandomStringUtils.randomAlphanumeric(32));
+    tellerTransaction.setClerk(AbstractTellerTest.TEST_USER);
+    tellerTransaction.setAmount(BigDecimal.valueOf(2000.00D));
+
+    final Account account = new Account();
+    account.setBalance(2000.00D);
+    account.setState(Account.State.OPEN.name());
+    Mockito.doAnswer(invocation -> Optional.of(account))
+        .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
+
+    final Charge charge = new Charge();
+    charge.setAmount(BigDecimal.valueOf(15.00D));
+    Mockito.doAnswer(invocation -> Lists.newArrayList(charge))
+        .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.any(TellerTransaction.class));
+    Mockito.doAnswer(invocation -> Collections.emptyList())
+        .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+
+    final TellerTransactionCosts tellerTransactionCosts = super.testSubject.post(teller.getCode(), tellerTransaction);
+
+    super.testSubject.confirm(teller.getCode(), tellerTransactionCosts.getTellerTransactionIdentifier(), "CONFIRM", "included");
   }
 }
