@@ -15,7 +15,9 @@
  */
 package io.mifos.teller.service.internal.service;
 
+import io.mifos.accounting.api.v1.domain.AccountEntry;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
+import io.mifos.accounting.api.v1.domain.AccountType;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
@@ -70,20 +72,27 @@ public class TellerManagementService {
     optionalTellerEntity.ifPresent(tellerEntity -> {
 
       final String accountIdentifier = tellerEntity.getTellerAccountIdentifier();
-      final LocalDateTime lastModifiedOn =
-          tellerEntity.getLastModifiedOn() != null ? tellerEntity.getLastModifiedOn() : LocalDateTime.now(Clock.systemUTC());
-      final LocalDate startDate = lastModifiedOn.toLocalDate();
-      final LocalDate endDate = lastModifiedOn.toLocalDate();
+      final LocalDate startDate = tellerEntity.getLastOpenedOn().toLocalDate();
+      final LocalDate endDate = LocalDate.now(Clock.systemUTC());
       final String dateRange =
           DateConverter.toIsoString(startDate) + ".." + DateConverter.toIsoString(endDate);
 
       final List<TellerEntry> tellerEntries = this.fetchTellerEntries(accountIdentifier, dateRange, 0);
-
-      tellerBalanceSheet.setDay(startDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-      tellerBalanceSheet.setBalance(
-          BigDecimal.valueOf(tellerEntries.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum())
-      );
       tellerBalanceSheet.setEntries(tellerEntries);
+      tellerBalanceSheet.setDay(startDate.format(DateTimeFormatter.BASIC_ISO_DATE));
+      final double sumDebits = tellerEntries
+          .stream()
+          .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.DEBIT.name()))
+          .mapToDouble(tellerEntry -> tellerEntry.getAmount().doubleValue())
+          .sum();
+
+      final double sumCredits = tellerEntries
+          .stream()
+          .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.CREDIT.name()))
+          .mapToDouble(tellerEntry -> tellerEntry.getAmount().doubleValue())
+          .sum();
+
+      tellerBalanceSheet.setBalance(BigDecimal.valueOf(sumDebits - sumCredits));
     });
     return tellerBalanceSheet;
   }
