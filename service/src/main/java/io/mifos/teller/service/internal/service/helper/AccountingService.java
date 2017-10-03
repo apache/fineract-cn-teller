@@ -20,7 +20,9 @@ import io.mifos.accounting.api.v1.client.LedgerManager;
 import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.accounting.api.v1.domain.AccountCommand;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
+import io.mifos.accounting.api.v1.domain.AccountPage;
 import io.mifos.accounting.api.v1.domain.JournalEntry;
+import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,14 @@ public class AccountingService {
     try {
       return Optional.of(this.ledgerManager.findAccount(accountIdentifier));
     } catch (final AccountNotFoundException anfex) {
-      this.logger.warn("Account {} not found.", accountIdentifier);
-      return Optional.empty();
+
+      final AccountPage accountPage = this.ledgerManager.fetchAccounts(true, accountIdentifier, null, true,
+          0, 10, null, null);
+
+      return accountPage.getAccounts()
+          .stream()
+          .filter(account -> account.getAlternativeAccountNumber().equals(accountIdentifier))
+          .findFirst();
     }
   }
 
@@ -67,13 +75,22 @@ public class AccountingService {
     final AccountCommand accountCommand = new AccountCommand();
     accountCommand.setAction(AccountCommand.Action.CLOSE.name());
     accountCommand.setComment(ServiceConstants.TX_CLOSE_ACCOUNT);
-    this.ledgerManager.accountCommand(accountIdentifier, accountCommand);
+    this.ledgerManager.accountCommand(this.resolveAccountIdentifier(accountIdentifier), accountCommand);
   }
 
   public void openAccount(final String accountIdentifier) {
     final AccountCommand accountCommand = new AccountCommand();
     accountCommand.setAction(AccountCommand.Action.REOPEN.name());
     accountCommand.setComment(ServiceConstants.TX_OPEN_ACCOUNT);
-    this.ledgerManager.accountCommand(accountIdentifier, accountCommand);
+    this.ledgerManager.accountCommand(this.resolveAccountIdentifier(accountIdentifier), accountCommand);
+  }
+
+  public String resolveAccountIdentifier(final String proposedAccountIdentifier) {
+    final Optional<Account> resolvedAccountIdentifier = this.findAccount(proposedAccountIdentifier);
+    if (resolvedAccountIdentifier.isPresent()) {
+      return resolvedAccountIdentifier.get().getIdentifier();
+    } else {
+      throw ServiceException.notFound("Account {0} not found.", proposedAccountIdentifier);
+    }
   }
 }

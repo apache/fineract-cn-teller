@@ -21,6 +21,7 @@ import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.service.internal.mapper.ChequeMapper;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
+import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.ChequeService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,14 +36,17 @@ public class ChequeTransactionHandler {
   private final Logger logger;
   private final ChequeService chequeService;
   private final TellerRepository tellerRepository;
+  private final AccountingService accountingService;
 
   @Autowired
   public ChequeTransactionHandler(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                                   final ChequeService chequeService,
-                                  final TellerRepository tellerRepository) {
+                                  final TellerRepository tellerRepository,
+                                  final AccountingService accountingService) {
     super();
     this.logger = logger;this.chequeService = chequeService;
     this.tellerRepository = tellerRepository;
+    this.accountingService = accountingService;
   }
 
   public void processCheque(final String tellerCode, final TellerTransaction tellerTransaction) {
@@ -50,7 +54,9 @@ public class ChequeTransactionHandler {
     final ChequeTransaction chequeTransaction = new ChequeTransaction();
     optionalTeller.ifPresent(tellerEntity ->
         chequeTransaction.setChequesReceivableAccount(tellerEntity.getChequesReceivableAccount()));
-    chequeTransaction.setCreditorAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+    chequeTransaction.setCreditorAccountNumber(
+        this.accountingService.resolveAccountIdentifier(tellerTransaction.getCustomerAccountIdentifier())
+    );
     chequeTransaction.setCheque(ChequeMapper.map(tellerTransaction.getCheque()));
 
     this.chequeService.process(chequeTransaction);

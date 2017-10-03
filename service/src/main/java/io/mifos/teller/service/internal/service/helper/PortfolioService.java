@@ -27,6 +27,7 @@ import io.mifos.portfolio.api.v1.domain.AccountAssignment;
 import io.mifos.portfolio.api.v1.domain.ChargeDefinition;
 import io.mifos.portfolio.api.v1.domain.Command;
 import io.mifos.portfolio.api.v1.domain.CostComponent;
+import io.mifos.portfolio.api.v1.domain.Payment;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
 import org.slf4j.Logger;
@@ -61,11 +62,12 @@ public class PortfolioService {
 
     try {
       //TODO switch CostComponent to PlannedPayment once avail
-      final List<CostComponent> costComponentsForAction =
-          this.portfolioManager.getCostComponentsForAction(
-              productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(), paymentSize);
+      final Payment payment = this.portfolioManager.getCostComponentsForAction(
+          productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(), paymentSize);
 
-      costComponentsForAction.forEach(costComponent -> {
+      final List<CostComponent> costComponents = payment.getCostComponents();
+
+      costComponents.forEach(costComponent -> {
         final ChargeDefinition chargeDefinition =
             this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
 

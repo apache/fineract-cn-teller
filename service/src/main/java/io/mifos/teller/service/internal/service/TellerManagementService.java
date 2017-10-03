@@ -17,7 +17,6 @@ package io.mifos.teller.service.internal.service;
 
 import io.mifos.accounting.api.v1.domain.AccountEntry;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
-import io.mifos.accounting.api.v1.domain.AccountType;
 import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
@@ -33,7 +32,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
