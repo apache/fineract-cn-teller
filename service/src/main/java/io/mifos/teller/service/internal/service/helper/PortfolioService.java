@@ -68,14 +68,20 @@ public class PortfolioService {
       final List<CostComponent> costComponents = payment.getCostComponents();
 
       costComponents.forEach(costComponent -> {
-        final ChargeDefinition chargeDefinition =
-            this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
-
-        final Charge charge = new Charge();
-        charge.setCode(chargeDefinition.getIdentifier());
-        charge.setName(chargeDefinition.getName());
-        charge.setAmount(costComponent.getAmount());
-        charges.add(charge);
+        if (costComponent.getAmount() != null
+            && costComponent.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+          try {
+            final ChargeDefinition chargeDefinition =
+                this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
+              final Charge charge = new Charge();
+              charge.setCode(chargeDefinition.getIdentifier());
+              charge.setName(chargeDefinition.getName());
+              charge.setAmount(costComponent.getAmount());
+              charges.add(charge);
+          } catch (final NotFoundException nfex) {
+            this.logger.warn("Charge {} not found.", costComponent.getChargeIdentifier());
+          }
+        }
       });
     } catch (final NotFoundException |  BadRequestException ex) {
       throw ServiceException.internalError(
