@@ -70,17 +70,18 @@ public class PortfolioService {
       costComponents.forEach(costComponent -> {
         if (costComponent.getAmount() != null
             && costComponent.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+          final Charge charge = new Charge();
+          charge.setCode(costComponent.getChargeIdentifier());
+          charge.setAmount(costComponent.getAmount());
           try {
             final ChargeDefinition chargeDefinition =
                 this.portfolioManager.getChargeDefinition(productIdentifier, costComponent.getChargeIdentifier());
-              final Charge charge = new Charge();
-              charge.setCode(chargeDefinition.getIdentifier());
-              charge.setName(chargeDefinition.getName());
-              charge.setAmount(costComponent.getAmount());
-              charges.add(charge);
+            charge.setName(chargeDefinition.getName());
           } catch (final NotFoundException nfex) {
             this.logger.warn("Charge {} not found.", costComponent.getChargeIdentifier());
+            charge.setName(costComponent.getChargeIdentifier());
           }
+          charges.add(charge);
         }
       });
     } catch (final NotFoundException |  BadRequestException ex) {
