@@ -89,12 +89,14 @@ public class DepositTransactionHandler {
       return;
     }
 
+    final String resolvedCustomerAccount = this.accountingService.resolveAccountIdentifier(tellerTransaction.getCustomerAccountIdentifier());
+
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
 
     final Debtor customerDebtor = new Debtor();
-    customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+    customerDebtor.setAccountNumber(resolvedCustomerAccount);
     customerDebtor.setAmount(tellerTransaction.getAmount().toString());
     debtors.add(customerDebtor);
 
@@ -102,7 +104,7 @@ public class DepositTransactionHandler {
       if (chargesIncluded) {
         debtors.add(this.createChargesDebtor(tellerEntity.getTellerAccountIdentifier(), tellerTransactionCosts));
       } else {
-        debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
+        debtors.add(this.createChargesDebtor(resolvedCustomerAccount, tellerTransactionCosts));
       }
     }
 
@@ -128,6 +130,8 @@ public class DepositTransactionHandler {
       return;
     }
 
+    final String resolvedCustomerAccount = this.accountingService.resolveAccountIdentifier(tellerTransaction.getCustomerAccountIdentifier());
+
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
     final HashSet<Debtor> debtors = new HashSet<>();
     journalEntry.setDebtors(debtors);
@@ -139,7 +143,7 @@ public class DepositTransactionHandler {
     } else {
       tellerDebtor.setAmount(tellerTransaction.getAmount().toString());
       if (!tellerTransactionCosts.getCharges().isEmpty()) {
-        debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
+        debtors.add(this.createChargesDebtor(resolvedCustomerAccount, tellerTransactionCosts));
       }
     }
     debtors.add(tellerDebtor);
@@ -148,7 +152,7 @@ public class DepositTransactionHandler {
     journalEntry.setCreditors(creditors);
 
     final Creditor customerCreditor = new Creditor();
-    customerCreditor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+    customerCreditor.setAccountNumber(resolvedCustomerAccount);
     customerCreditor.setAmount(tellerTransaction.getAmount().toString());
     creditors.add(customerCreditor);
 
@@ -166,6 +170,8 @@ public class DepositTransactionHandler {
       return;
     }
 
+    final String resolvedCustomerAccount = this.accountingService.resolveAccountIdentifier(tellerTransaction.getCustomerAccountIdentifier());
+
     final JournalEntry journalEntry = this.prepareJournalEntry(tellerTransaction);
 
     final HashSet<Debtor> debtors = new HashSet<>();
@@ -176,7 +182,7 @@ public class DepositTransactionHandler {
 
     if (tellerTransaction.getAmount().compareTo(BigDecimal.ZERO) > 0) {
       final Debtor customerDebtor = new Debtor();
-      customerDebtor.setAccountNumber(tellerTransaction.getCustomerAccountIdentifier());
+      customerDebtor.setAccountNumber(resolvedCustomerAccount);
       customerDebtor.setAmount(tellerTransaction.getAmount().toString());
       debtors.add(customerDebtor);
 
@@ -190,7 +196,7 @@ public class DepositTransactionHandler {
       if (chargesIncluded) {
         debtors.add(this.createChargesDebtor(tellerEntity.getTellerAccountIdentifier(), tellerTransactionCosts));
       } else {
-        debtors.add(this.createChargesDebtor(tellerTransaction.getCustomerAccountIdentifier(), tellerTransactionCosts));
+        debtors.add(this.createChargesDebtor(resolvedCustomerAccount, tellerTransactionCosts));
       }
     }
 
@@ -204,6 +210,7 @@ public class DepositTransactionHandler {
     this.processCashWithdrawal(tellerCode, tellerTransaction, chargesIncluded);
 
     this.depositAccountManagementService.closeProductInstance(tellerTransaction.getCustomerAccountIdentifier());
+
     this.accountingService.closeAccount(tellerTransaction.getCustomerAccountIdentifier());
   }
 

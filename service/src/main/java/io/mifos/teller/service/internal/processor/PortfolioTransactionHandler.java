@@ -82,6 +82,5 @@ public class PortfolioTransactionHandler {
     } else {
       throw ServiceException.notFound("Teller {0} not found." , tellerCode);
     }
-
   }
 }
