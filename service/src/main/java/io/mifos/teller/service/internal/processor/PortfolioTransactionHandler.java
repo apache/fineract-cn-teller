@@ -30,6 +30,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class PortfolioTransactionHandler {
@@ -59,9 +61,12 @@ public class PortfolioTransactionHandler {
     tellerTransactionCosts.setCharges(charges);
     tellerTransactionCosts.setTellerTransactionIdentifier(tellerTransaction.getIdentifier());
     tellerTransactionCosts.setTotalAmount(
-        BigDecimal.valueOf(
-            charges.stream().mapToDouble(value -> value.getAmount().doubleValue()).sum()
-        )
+        charges
+            .stream()
+            .map(Charge::getAmount)
+            .collect(Collectors.toList())
+                .stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
     );
 
     return tellerTransactionCosts;

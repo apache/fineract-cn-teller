@@ -61,7 +61,6 @@ public class PortfolioService {
     final List<Charge> charges =  new ArrayList<>();
 
     try {
-      //TODO switch CostComponent to PlannedPayment once avail
       final Payment payment = this.portfolioManager.getCostComponentsForAction(
           productIdentifier, caseIdentifier, Action.ACCEPT_PAYMENT.name(), Sets.newHashSet(), paymentSize);
 
