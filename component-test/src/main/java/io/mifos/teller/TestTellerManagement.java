@@ -21,6 +21,7 @@ import io.mifos.teller.api.v1.client.TellerAlreadyExistsException;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerValidationException;
 import io.mifos.teller.api.v1.domain.Teller;
+import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.util.TellerGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -594,6 +595,28 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     super.testSubject.deleteTeller(officeIdentifier, teller.getCode());
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.DELETE_TELLER, teller.getCode()));
+  }
+
+  @Test
+  public void shouldReturnZeroBalanceTellerNeverOpened() throws Exception {
+    final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
+    final Teller teller = TellerGenerator.createRandomTeller();
+    teller.setCashdrawLimit(BigDecimal.valueOf(10000.00D));
+
+    Mockito.doAnswer(invocation -> true)
+        .when(super.organizationServiceSpy).officeExists(Matchers.eq(officeIdentifier));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+
+    super.testSubject.create(officeIdentifier, teller);
+    Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
+
+    final TellerBalanceSheet tellerBalanceSheet = super.testSubject.getBalance(officeIdentifier, teller.getCode());
+    Assert.assertTrue(BigDecimal.ZERO.compareTo(tellerBalanceSheet.getBalance()) == 0);
   }
 
   private void compareTeller(final Teller expected, final Teller actual) {

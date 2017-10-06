@@ -17,7 +17,9 @@ package io.mifos.teller.service.internal.service;
 
 import io.mifos.accounting.api.v1.domain.AccountEntry;
 import io.mifos.accounting.api.v1.domain.AccountEntryPage;
+import io.mifos.accounting.api.v1.domain.TransactionType;
 import io.mifos.core.lang.DateConverter;
+import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerEntry;
@@ -69,28 +71,38 @@ public class TellerManagementService {
     final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(tellerCode);
     optionalTellerEntity.ifPresent(tellerEntity -> {
 
-      final String accountIdentifier = tellerEntity.getTellerAccountIdentifier();
-      final LocalDate startDate = tellerEntity.getLastOpenedOn().toLocalDate();
-      final LocalDate endDate = LocalDate.now(Clock.systemUTC());
-      final String dateRange =
-          DateConverter.toIsoString(startDate) + ".." + DateConverter.toIsoString(endDate);
+      if (tellerEntity.getLastOpenedOn() != null) {
+        final String accountIdentifier = tellerEntity.getTellerAccountIdentifier();
+        final LocalDate startDate = tellerEntity.getLastOpenedOn().toLocalDate();
+        final LocalDate endDate = LocalDate.now(Clock.systemUTC());
+        final String dateRange =
+            DateConverter.toIsoString(startDate) + ".." + DateConverter.toIsoString(endDate);
 
-      final List<TellerEntry> tellerEntries = this.fetchTellerEntries(accountIdentifier, dateRange, 0);
-      tellerBalanceSheet.setEntries(tellerEntries);
-      tellerBalanceSheet.setDay(startDate.format(DateTimeFormatter.BASIC_ISO_DATE));
-      final double sumDebits = tellerEntries
-          .stream()
-          .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.DEBIT.name()))
-          .mapToDouble(tellerEntry -> tellerEntry.getAmount().doubleValue())
-          .sum();
+        final List<TellerEntry> tellerEntries = this.fetchTellerEntries(accountIdentifier, dateRange, 0);
+        tellerBalanceSheet.setEntries(tellerEntries);
+        tellerBalanceSheet.setDay(startDate.format(DateTimeFormatter.BASIC_ISO_DATE));
+        final BigDecimal sumDebits = tellerEntries
+            .stream()
+            .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.DEBIT.name())
+                && !tellerEntry.getMessage().equals(ServiceConstants.TX_CHEQUE))
+            .map(TellerEntry::getAmount)
+            .collect(Collectors.toList())
+                .stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-      final double sumCredits = tellerEntries
-          .stream()
-          .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.CREDIT.name()))
-          .mapToDouble(tellerEntry -> tellerEntry.getAmount().doubleValue())
-          .sum();
+        final BigDecimal sumCredits = tellerEntries
+            .stream()
+            .filter(tellerEntry -> tellerEntry.getType().equals(AccountEntry.Type.CREDIT.name())
+                && !tellerEntry.getMessage().equals(ServiceConstants.TX_CHEQUE))
+            .map(TellerEntry::getAmount)
+            .collect(Collectors.toList())
+                .stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-      tellerBalanceSheet.setBalance(BigDecimal.valueOf(sumDebits - sumCredits));
+        tellerBalanceSheet.setBalance(sumDebits.subtract(sumCredits));
+      } else {
+        tellerBalanceSheet.setBalance(BigDecimal.ZERO);
+      }
     });
     return tellerBalanceSheet;
   }

@@ -140,6 +140,8 @@ public class TestTellerOperation extends AbstractTellerTest {
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(tellerTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).fetchProductInstances(tellerTransaction.getCustomerIdentifier());
+    Mockito.doAnswer(invocation -> new ProductDefinition())
+        .when(super.depositAccountManagementServiceSpy).findProductDefinition(tellerTransaction.getProductIdentifier());
 
     super.testSubject.post(teller.getCode(), tellerTransaction);
   }
@@ -415,6 +417,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     tellerTransaction.setAmount(BigDecimal.valueOf(15000L));
 
     final Account account = new Account();
+    account.setState(Account.State.OPEN.name());
     account.setBalance(20000.00D);
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(tellerTransaction.getCustomerAccountIdentifier());
@@ -527,6 +530,8 @@ public class TestTellerOperation extends AbstractTellerTest {
         .when(super.depositAccountManagementServiceSpy).getCharges(Matchers.eq(openAccountTransaction));
     Mockito.doAnswer(invocation -> Collections.emptyList())
         .when(super.depositAccountManagementServiceSpy).fetchProductInstances(openAccountTransaction.getCustomerIdentifier());
+    Mockito.doAnswer(invocation -> new ProductDefinition())
+        .when(super.depositAccountManagementServiceSpy).findProductDefinition(openAccountTransaction.getProductIdentifier());
 
     final TellerTransactionCosts openingCosts = super.testSubject.post(teller.getCode(), openAccountTransaction);
     super.testSubject.confirm(teller.getCode(), openingCosts.getTellerTransactionIdentifier(), "CONFIRM", "excluded");
@@ -623,6 +628,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito
         .doAnswer(invocation -> {
           final Account mockedAccount = new Account();
+          mockedAccount.setBalance(2000.00D);
           mockedAccount.setState(Account.State.OPEN.name());
           return Optional.of(mockedAccount);
         })
@@ -687,6 +693,7 @@ public class TestTellerOperation extends AbstractTellerTest {
     Mockito
         .doAnswer(invocation -> {
           final Account mockedAccount = new Account();
+          mockedAccount.setBalance(1000.00D);
           mockedAccount.setState(Account.State.OPEN.name());
           return Optional.of(mockedAccount);
         })
