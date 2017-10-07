@@ -25,6 +25,7 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
+import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
@@ -349,7 +350,10 @@ public class TellerOperationRestController {
 
         final TellerTransactionCosts tellerTransactionCosts =
             this.tellerTransactionProcessor.getCosts(tellerTransaction);
-        final BigDecimal costs = tellerTransactionCosts.getTotalAmount();
+        final BigDecimal costs = tellerTransactionCosts.getCharges()
+            .stream()
+            .map(Charge::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
         final BigDecimal amountExcludingCosts = transactionAmount.subtract(costs != null ? costs : BigDecimal.ZERO);
         if (amountExcludingCosts.compareTo(minimumBalance) < 0) {
           throw ServiceException.conflict(
