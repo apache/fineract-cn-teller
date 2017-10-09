@@ -344,7 +344,7 @@ public class TellerOperationRestController {
         final BigDecimal minimumBalance = BigDecimal.valueOf(productDefinition.getMinimumBalance());
         if (transactionAmount.compareTo(minimumBalance) < 0) {
           throw ServiceException.conflict(
-              "Amount {0} must be equals or greater than minimum balance {1}.",
+              "Amount {0} must be equal to or greater than minimum balance {1}.",
               transactionAmount, minimumBalance);
         }
       }
