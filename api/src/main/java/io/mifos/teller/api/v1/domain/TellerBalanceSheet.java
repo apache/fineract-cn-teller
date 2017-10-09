@@ -25,8 +25,12 @@ public class TellerBalanceSheet {
   private String day;
   @DecimalMin(value = "0.001")
   @DecimalMax(value = "9999999999.99999")
-  private BigDecimal balance;
-  private List<TellerEntry> entries;
+  private BigDecimal cashOnHand;
+  private BigDecimal cashReceivedTotal;
+  private BigDecimal cashDisbursedTotal;
+  private BigDecimal chequesReceivedTotal;
+  private List<TellerEntry> cashEntries;
+  private List<TellerEntry> chequeEntries;
 
   public TellerBalanceSheet() {
     super();
@@ -40,19 +44,51 @@ public class TellerBalanceSheet {
     this.day = day;
   }
 
-  public BigDecimal getBalance() {
-    return this.balance;
+  public BigDecimal getCashOnHand() {
+    return this.cashOnHand;
   }
 
-  public void setBalance(final BigDecimal balance) {
-    this.balance = balance;
+  public void setCashOnHand(final BigDecimal cashOnHand) {
+    this.cashOnHand = cashOnHand;
   }
 
-  public List<TellerEntry> getEntries() {
-    return this.entries;
+  public BigDecimal getCashReceivedTotal() {
+    return this.cashReceivedTotal;
   }
 
-  public void setEntries(final List<TellerEntry> entries) {
-    this.entries = entries;
+  public void setCashReceivedTotal(final BigDecimal cashReceivedTotal) {
+    this.cashReceivedTotal = cashReceivedTotal;
+  }
+
+  public BigDecimal getCashDisbursedTotal() {
+    return this.cashDisbursedTotal;
+  }
+
+  public void setCashDisbursedTotal(final BigDecimal cashDisbursedTotal) {
+    this.cashDisbursedTotal = cashDisbursedTotal;
+  }
+
+  public BigDecimal getChequesReceivedTotal() {
+    return this.chequesReceivedTotal;
+  }
+
+  public void setChequesReceivedTotal(final BigDecimal chequesReceivedTotal) {
+    this.chequesReceivedTotal = chequesReceivedTotal;
+  }
+
+  public List<TellerEntry> getCashEntries() {
+    return this.cashEntries;
+  }
+
+  public void setCashEntries(final List<TellerEntry> cashEntries) {
+    this.cashEntries = cashEntries;
+  }
+
+  public List<TellerEntry> getChequeEntries() {
+    return this.chequeEntries;
+  }
+
+  public void setChequeEntries(final List<TellerEntry> chequeEntries) {
+    this.chequeEntries = chequeEntries;
   }
 }

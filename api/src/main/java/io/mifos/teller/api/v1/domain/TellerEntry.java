@@ -23,7 +23,8 @@ public class TellerEntry {
 
   public enum Type {
     DEBIT,
-    CREDIT
+    CREDIT,
+    CHEQUE
   }
 
   private Type type;

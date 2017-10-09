@@ -28,7 +28,7 @@ public class TellerEntryMapper {
 
   public static TellerEntry map(final AccountEntry accountEntry) {
     final TellerEntry tellerEntry = new TellerEntry();
-    tellerEntry.setType(accountEntry.getType());
+    tellerEntry.setType(TellerEntry.Type.valueOf(accountEntry.getType()).name());
     tellerEntry.setTransactionDate(accountEntry.getTransactionDate());
     tellerEntry.setMessage(accountEntry.getMessage());
     tellerEntry.setAmount(BigDecimal.valueOf(accountEntry.getAmount()));
