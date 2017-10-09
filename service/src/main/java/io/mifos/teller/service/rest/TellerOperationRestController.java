@@ -340,25 +340,13 @@ public class TellerOperationRestController {
     if (transactionType.equals(ServiceConstants.TX_OPEN_ACCOUNT)) {
       final ProductDefinition productDefinition =
           this.depositAccountManagementService.findProductDefinition(tellerTransaction.getProductIdentifier());
-      if (productDefinition.getMinimumBalance() != null && productDefinition.getMinimumBalance() > 0.00D) {
+      if (productDefinition.getMinimumBalance() != null
+          && productDefinition.getMinimumBalance() > 0.00D) {
         final BigDecimal minimumBalance = BigDecimal.valueOf(productDefinition.getMinimumBalance());
         if (transactionAmount.compareTo(minimumBalance) < 0) {
           throw ServiceException.conflict(
               "Amount {0} must be equals or greater than minimum balance {1}.",
               transactionAmount, minimumBalance);
-        }
-
-        final TellerTransactionCosts tellerTransactionCosts =
-            this.tellerTransactionProcessor.getCosts(tellerTransaction);
-        final BigDecimal costs = tellerTransactionCosts.getCharges()
-            .stream()
-            .map(Charge::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        final BigDecimal amountExcludingCosts = transactionAmount.subtract(costs != null ? costs : BigDecimal.ZERO);
-        if (amountExcludingCosts.compareTo(minimumBalance) < 0) {
-          throw ServiceException.conflict(
-              "Amount {0} excluding costs {1} must be equals or greater than minimum balance {2}.",
-              transactionAmount, costs, minimumBalance);
         }
       }
     }
