@@ -18,6 +18,7 @@ package io.mifos.teller.service.internal.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +30,9 @@ public interface TellerTransactionRepository extends JpaRepository<TellerTransac
 
   List<TellerTransactionEntity> findByTellerAndStateOrderByTransactionDateAsc(final TellerEntity teller,
                                                                               final String state);
+
+  List<TellerTransactionEntity> findByTellerAndTransactionTypeAndTransactionDateBetween(final TellerEntity tellerEntity,
+                                                                                        final String transactionType,
+                                                                                        final LocalDateTime startDate,
+                                                                                        final LocalDateTime endDate);
 }

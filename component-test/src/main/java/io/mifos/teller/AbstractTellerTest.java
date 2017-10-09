@@ -24,6 +24,7 @@ import io.mifos.core.test.listener.EventRecorder;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerManager;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
+import io.mifos.teller.service.internal.service.helper.ChequeService;
 import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
 import io.mifos.teller.service.internal.service.helper.OrganizationService;
 import io.mifos.teller.service.internal.service.helper.PortfolioService;
@@ -102,6 +103,9 @@ public class AbstractTellerTest extends SuiteTestEnvironment {
 
   @MockBean
   PortfolioService portfolioServiceSpy;
+
+  @MockBean
+  ChequeService chequeServiceSpy;
 
   @Autowired
   private ApplicationName applicationName;

@@ -25,7 +25,6 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
-import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerTransaction;

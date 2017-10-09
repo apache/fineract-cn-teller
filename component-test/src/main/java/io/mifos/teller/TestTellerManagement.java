@@ -616,7 +616,7 @@ public class TestTellerManagement extends AbstractTellerTest {
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
 
     final TellerBalanceSheet tellerBalanceSheet = super.testSubject.getBalance(officeIdentifier, teller.getCode());
-    Assert.assertTrue(BigDecimal.ZERO.compareTo(tellerBalanceSheet.getBalance()) == 0);
+    Assert.assertTrue(BigDecimal.ZERO.compareTo(tellerBalanceSheet.getCashOnHand()) == 0);
   }
 
   private void compareTeller(final Teller expected, final Teller actual) {
