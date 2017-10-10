@@ -367,12 +367,14 @@ public class TellerOperationRestController {
         throw ServiceException.conflict("Cheque {0} already used.", chequeIdentifier);
       }
 
-      this.accountingService.findAccount(micr.getAccountNumber()).ifPresent(account -> {
-        final BigDecimal balance = BigDecimal.valueOf(account.getBalance());
-        if (tellerTransaction.getAmount().compareTo(balance) > 0) {
-          throw ServiceException.conflict("Cheque not covered.");
-        }
-      });
+      if (this.organizationService.officeExists(micr.getBranchSortCode())) {
+        this.accountingService.findAccount(micr.getAccountNumber()).ifPresent(account -> {
+          final BigDecimal balance = BigDecimal.valueOf(account.getBalance());
+          if (tellerTransaction.getAmount().compareTo(balance) > 0) {
+            throw ServiceException.conflict("Cheque not covered.");
+          }
+        });
+      }
     }
   }
 }
