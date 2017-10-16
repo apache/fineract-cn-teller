@@ -18,17 +18,21 @@ package io.mifos.teller.service.rest;
 import io.mifos.anubis.annotation.AcceptedTokenType;
 import io.mifos.anubis.annotation.Permittable;
 import io.mifos.core.command.gateway.CommandGateway;
+import io.mifos.core.lang.DateConverter;
+import io.mifos.core.lang.DateRange;
 import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
+import io.mifos.teller.api.v1.domain.TellerDenomination;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
 import io.mifos.teller.service.internal.command.CloseTellerCommand;
 import io.mifos.teller.service.internal.command.CreateTellerCommand;
 import io.mifos.teller.service.internal.command.DeleteTellerCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
+import io.mifos.teller.service.internal.command.TellerDenominationCommand;
 import io.mifos.teller.service.internal.service.TellerManagementService;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.OrganizationService;
@@ -41,10 +45,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +97,8 @@ public class TellerManagementRestController {
     this.verifyOffice(officeIdentifier);
     this.verifyAccount(teller.getTellerAccountIdentifier());
     this.verifyAccount(teller.getVaultAccountIdentifier());
+    this.verifyAccount(teller.getChequesReceivableAccount());
+    this.verifyAccount(teller.getCashOverShortAccount());
 
     this.commandGateway.process(new CreateTellerCommand(officeIdentifier, teller));
 
@@ -148,6 +158,8 @@ public class TellerManagementRestController {
     this.verifyOffice(officeIdentifier);
     this.verifyAccount(teller.getTellerAccountIdentifier());
     this.verifyAccount(teller.getVaultAccountIdentifier());
+    this.verifyAccount(teller.getChequesReceivableAccount());
+    this.verifyAccount(teller.getCashOverShortAccount());
 
     this.commandGateway.process(new ChangeTellerCommand(officeIdentifier, teller));
 
@@ -165,6 +177,7 @@ public class TellerManagementRestController {
   ResponseEntity<Void> post(@PathVariable("officeIdentifier") final String officeIdentifier,
                             @PathVariable("tellerCode") final String tellerCode,
                             @RequestBody @Valid final TellerManagementCommand tellerManagementCommand) {
+    this.verifyOffice(officeIdentifier);
     final Teller teller = this.verifyTeller(tellerCode);
 
     final TellerManagementCommand.Action action = TellerManagementCommand.Action.valueOf(tellerManagementCommand.getAction());
@@ -179,6 +192,14 @@ public class TellerManagementRestController {
       case CLOSE:
         if (teller.getState().equals(Teller.State.CLOSED.name())) {
           throw ServiceException.badRequest("Teller {0} is already closed.", tellerCode);
+        }
+        if (teller.getDenominationRequired()) {
+          final LocalDateTime lastOpenedOn = DateConverter.fromIsoString(teller.getLastOpenedOn());
+          if (this.tellerManagementService
+              .fetchTellerDenominations(tellerCode, lastOpenedOn, LocalDateTime.now(Clock.systemUTC()))
+              .isEmpty()) {
+            throw ServiceException.conflict("Denomination for teller {0} required.", tellerCode);
+          }
         }
         this.commandGateway.process(new CloseTellerCommand(tellerCode, tellerManagementCommand));
         break;
@@ -225,6 +246,67 @@ public class TellerManagementRestController {
     this.commandGateway.process(new DeleteTellerCommand(tellerCode));
 
     return ResponseEntity.accepted().build();
+  }
+
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_MANAGEMENT)
+  @RequestMapping(
+      value = "/{tellerCode}/denominations",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public
+  @ResponseBody
+  ResponseEntity<Void> saveTellerDenomination(@PathVariable("officeIdentifier") final String officeIdentifier,
+                                              @PathVariable("tellerCode") final String tellerCode,
+                                              @RequestBody @Valid final TellerDenomination tellerDenomination) {
+    this.verifyOffice(officeIdentifier);
+    final Teller teller = this.verifyTeller(tellerCode);
+    if (!teller.getState().equals(Teller.State.PAUSED.name())) {
+      throw ServiceException.conflict("Teller {0} is still in use.", tellerCode);
+    }
+
+    if (teller.getCashOverShortAccount() == null) {
+      throw ServiceException.badRequest("Cash over/short account for teller {0} not set.", tellerCode);
+    }
+
+    this.verifyAccount(teller.getCashOverShortAccount());
+
+    final TellerBalanceSheet tellerBalanceSheet = this.tellerManagementService.getBalance(tellerCode);
+
+    this.commandGateway.process(
+        new TellerDenominationCommand(tellerCode, tellerBalanceSheet.getCashOnHand(), tellerDenomination));
+
+    return ResponseEntity.accepted().build();
+  }
+
+  @Permittable(value = AcceptedTokenType.TENANT, groupId = PermittableGroupIds.TELLER_MANAGEMENT)
+  @RequestMapping(
+      value = "/{tellerCode}/denominations",
+      method = RequestMethod.GET,
+      consumes = MediaType.ALL_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public
+  @ResponseBody
+  ResponseEntity<List<TellerDenomination>> fetchTellerDenominations(
+      @PathVariable("officeIdentifier") final String officeIdentifier,
+      @PathVariable("tellerCode") final String tellerCode,
+      @RequestParam(value = "dateRange", required = false) final String dateRange) {
+    this.verifyOffice(officeIdentifier);
+    this.verifyTeller(tellerCode);
+
+    final DateRange dateRangeHolder;
+    if (dateRange != null) {
+      dateRangeHolder = DateRange.fromIsoString(dateRange);
+    } else {
+      final LocalDate now = LocalDate.now();
+      dateRangeHolder = new DateRange(now.minusMonths(1L).plusDays(1L), now);
+    }
+    return ResponseEntity.ok(
+        this.tellerManagementService.fetchTellerDenominations(
+            tellerCode, dateRangeHolder.getStartDateTime(), dateRangeHolder.getEndDateTime())
+    );
   }
 
   private void verifyAccount(final String accountIdentifier) {

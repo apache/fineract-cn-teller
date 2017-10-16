@@ -20,6 +20,7 @@ import io.mifos.core.api.annotation.ThrowsExceptions;
 import io.mifos.core.api.util.CustomFeignClientsConfiguration;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
+import io.mifos.teller.api.v1.domain.TellerDenomination;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
@@ -197,4 +198,33 @@ public interface TellerManager {
   })
   void deleteTeller(@PathVariable("officeIdentifier") final String officeIdentifier,
                     @PathVariable("tellerCode") final String tellerCode);
+
+  @RequestMapping(
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}/denominations",
+      method = RequestMethod.POST,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  @ThrowsExceptions({
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerValidationException.class)
+  })
+  void saveTellerDenomination(@PathVariable("officeIdentifier") final String officeIdentifier,
+                              @PathVariable("tellerCode") final String tellerCode,
+                              @RequestBody @Valid final TellerDenomination tellerDenomination);
+
+  @RequestMapping(
+      value = "/offices/{officeIdentifier}/teller/{tellerCode}/denominations",
+      method = RequestMethod.GET,
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.ALL_VALUE
+  )
+  @ThrowsExceptions({
+      @ThrowsException(status = HttpStatus.NOT_FOUND, exception = TellerNotFoundException.class),
+      @ThrowsException(status = HttpStatus.CONFLICT, exception = TellerValidationException.class)
+  })
+  List<TellerDenomination> fetchTellerDenominations(
+      @PathVariable("officeIdentifier") final String officeIdentifier,
+      @PathVariable("tellerCode") final String tellerCode,
+      @RequestParam(value = "dateRange", required = false) final String dateRange);
 }

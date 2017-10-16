@@ -20,10 +20,13 @@ import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
+import io.mifos.teller.api.v1.domain.TellerDenomination;
 import io.mifos.teller.api.v1.domain.TellerEntry;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
+import io.mifos.teller.service.internal.mapper.TellerDenominationMapper;
 import io.mifos.teller.service.internal.mapper.TellerEntryMapper;
 import io.mifos.teller.service.internal.mapper.TellerMapper;
+import io.mifos.teller.service.internal.repository.TellerDenominationRepository;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.repository.TellerTransactionEntity;
@@ -47,15 +50,18 @@ public class TellerManagementService {
 
   private final TellerRepository tellerRepository;
   private final TellerTransactionRepository tellerTransactionRepository;
+  private final TellerDenominationRepository tellerDenominationRepository;
   private final AccountingService accountingService;
 
   @Autowired
   public TellerManagementService(final TellerRepository tellerRepository,
                                  final TellerTransactionRepository tellerTransactionRepository,
+                                 final TellerDenominationRepository tellerDenominationRepository,
                                  final AccountingService accountingService) {
     super();
     this.tellerRepository = tellerRepository;
     this.tellerTransactionRepository = tellerTransactionRepository;
+    this.tellerDenominationRepository = tellerDenominationRepository;
     this.accountingService = accountingService;
   }
 
@@ -140,6 +146,22 @@ public class TellerManagementService {
       }
     });
     return tellerBalanceSheet;
+  }
+
+  public List<TellerDenomination> fetchTellerDenominations(
+      final String tellerCode, final LocalDateTime startDate, final LocalDateTime endDate) {
+    final ArrayList<TellerDenomination> tellerDenominations = new ArrayList<>();
+    this.tellerRepository.findByIdentifier(tellerCode).ifPresent(tellerEntity ->
+      tellerDenominations.addAll(
+          this.tellerDenominationRepository.findByTellerAndCreatedOnBetweenOrderByCreatedOnDesc(
+              tellerEntity, startDate, endDate)
+              .stream()
+              .map(TellerDenominationMapper::map)
+              .collect(Collectors.toList())
+      )
+    );
+
+    return tellerDenominations;
   }
 
   private List<TellerEntry> fetchTellerEntries(final String accountIdentifier, final String dateRange, final Integer pageIndex) {

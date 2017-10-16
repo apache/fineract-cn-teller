@@ -51,6 +51,8 @@ public class TellerEntity {
   private String vaultAccountIdentifier;
   @Column(name = "cheques_receivable_account", nullable = false, length = 34)
   private String chequesReceivableAccount;
+  @Column(name = "cash_over_short_account", nullable = false, length = 34)
+  private String cashOverShortAccount;
   @Column(name = "assigned_employee_identifier", nullable = true, length = 32)
   private String assignedEmployeeIdentifier;
   @Column(name = "a_state", nullable = false, length = 256)
@@ -146,6 +148,14 @@ public class TellerEntity {
 
   public void setChequesReceivableAccount(final String chequesReceivableAccount) {
     this.chequesReceivableAccount = chequesReceivableAccount;
+  }
+
+  public String getCashOverShortAccount() {
+    return this.cashOverShortAccount;
+  }
+
+  public void setCashOverShortAccount(final String cashOverShortAccount) {
+    this.cashOverShortAccount = cashOverShortAccount;
   }
 
   public String getAssignedEmployeeIdentifier() {

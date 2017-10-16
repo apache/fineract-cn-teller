@@ -56,7 +56,8 @@ public class AccountingService {
 
       return accountPage.getAccounts()
           .stream()
-          .filter(account -> account.getAlternativeAccountNumber().equals(accountIdentifier))
+          .filter(account -> account.getAlternativeAccountNumber() != null
+              && account.getAlternativeAccountNumber().equals(accountIdentifier))
           .findFirst();
     }
   }
