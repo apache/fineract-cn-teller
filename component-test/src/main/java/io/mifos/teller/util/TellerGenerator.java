@@ -33,6 +33,7 @@ public class TellerGenerator {
     teller.setTellerAccountIdentifier(RandomStringUtils.randomAlphanumeric(34));
     teller.setVaultAccountIdentifier(RandomStringUtils.randomAlphanumeric(34));
     teller.setChequesReceivableAccount(RandomStringUtils.randomAlphanumeric(34));
+    teller.setCashOverShortAccount(RandomStringUtils.randomAlphanumeric(34));
     teller.setCashdrawLimit(BigDecimal.valueOf(10000L));
 
     return teller;

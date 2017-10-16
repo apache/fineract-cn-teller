@@ -124,4 +124,16 @@ public class TellerEventListener {
                              final String payload) {
     this.logger.debug("Teller {} created.", payload);
     this.eventRecorder.event(tenant, EventConstants.DELETE_TELLER, payload, String.class);
-  }}
+  }
+
+  @JmsListener(
+      destination = EventConstants.DESTINATION,
+      selector = EventConstants.SELECTOR_SAVE_DENOMINATION,
+      subscription = EventConstants.DESTINATION
+  )
+  public void onSaveDenomination(@Header(TenantHeaderFilter.TENANT_HEADER) final String tenant,
+                                 final String payload) {
+    this.logger.debug("Teller {} created.", payload);
+    this.eventRecorder.event(tenant, EventConstants.SAVE_DENOMINATION, payload, String.class);
+  }
+}

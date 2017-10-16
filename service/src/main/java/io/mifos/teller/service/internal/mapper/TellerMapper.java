@@ -33,6 +33,7 @@ public class TellerMapper {
     teller.setCashdrawLimit(tellerEntity.getCashdrawLimit());
     teller.setAssignedEmployee(tellerEntity.getAssignedEmployeeIdentifier());
     teller.setChequesReceivableAccount(tellerEntity.getChequesReceivableAccount());
+    teller.setCashOverShortAccount(tellerEntity.getCashOverShortAccount());
     teller.setState(tellerEntity.getState());
     if (tellerEntity.getCreatedBy() != null) {
       teller.setCreatedBy(tellerEntity.getCreatedBy());
@@ -58,6 +59,7 @@ public class TellerMapper {
     tellerEntity.setTellerAccountIdentifier(teller.getTellerAccountIdentifier());
     tellerEntity.setVaultAccountIdentifier(teller.getVaultAccountIdentifier());
     tellerEntity.setChequesReceivableAccount(teller.getChequesReceivableAccount());
+    tellerEntity.setCashOverShortAccount(teller.getCashOverShortAccount());
     tellerEntity.setCashdrawLimit(teller.getCashdrawLimit());
     tellerEntity.setAssignedEmployeeIdentifier(teller.getAssignedEmployee());
     if (teller.getState() != null) {

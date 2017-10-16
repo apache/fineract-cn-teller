@@ -28,6 +28,7 @@ import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.domain.Teller;
+import io.mifos.teller.api.v1.domain.TellerDenomination;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.service.internal.command.ChangeTellerCommand;
@@ -37,7 +38,10 @@ import io.mifos.teller.service.internal.command.DeleteTellerCommand;
 import io.mifos.teller.service.internal.command.DrawerUnlockCommand;
 import io.mifos.teller.service.internal.command.OpenTellerCommand;
 import io.mifos.teller.service.internal.command.PauseTellerCommand;
+import io.mifos.teller.service.internal.command.TellerDenominationCommand;
 import io.mifos.teller.service.internal.mapper.TellerMapper;
+import io.mifos.teller.service.internal.repository.TellerDenominationEntity;
+import io.mifos.teller.service.internal.repository.TellerDenominationRepository;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
@@ -61,6 +65,7 @@ public class TellerAggregate {
 
   private final Logger logger;
   private final TellerRepository tellerRepository;
+  private final TellerDenominationRepository tellerDenominationRepository;
   private final OrganizationService organizationService;
   private final AccountingService accountingService;
   private final HashGenerator hashGenerator;
@@ -69,6 +74,7 @@ public class TellerAggregate {
   @Autowired
   public TellerAggregate(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                          final TellerRepository tellerRepository,
+                         final TellerDenominationRepository tellerDenominationRepository,
                          final OrganizationService organizationService,
                          final AccountingService accountingService,
                          final HashGenerator hashGenerator,
@@ -76,6 +82,7 @@ public class TellerAggregate {
     super();
     this.logger = logger;
     this.tellerRepository = tellerRepository;
+    this.tellerDenominationRepository = tellerDenominationRepository;
     this.organizationService = organizationService;
     this.accountingService = accountingService;
     this.hashGenerator = hashGenerator;
@@ -295,6 +302,33 @@ public class TellerAggregate {
     return null;
   }
 
+  @Transactional
+  @CommandHandler
+  @EventEmitter(selectorName = EventConstants.SELECTOR_NAME, selectorValue = EventConstants.SAVE_DENOMINATION)
+  public String process(final TellerDenominationCommand tellerDenominationCommand) {
+    final String tellerCode = tellerDenominationCommand.tellerCode();
+    final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
+    final TellerEntity tellerEntity = optionalTeller.orElseThrow(
+        () -> ServiceException.notFound("Teller {0} not found.", tellerCode)
+    );
+
+    final TellerDenomination tellerDenomination = tellerDenominationCommand.tellerDenomination();
+    final TellerDenominationEntity tellerDenominationEntity = new TellerDenominationEntity();
+    tellerDenominationEntity.setTeller(tellerEntity);
+    tellerDenominationEntity.setCountedTotal(tellerDenomination.getCountedTotal());
+    tellerDenominationEntity.setNote(tellerDenomination.getNote());
+    tellerDenominationEntity.setCreatedBy(UserContextHolder.checkedGetUser());
+    tellerDenominationEntity.setCreatedOn(LocalDateTime.now(Clock.systemUTC()));
+
+    this.adjustDenominatedTellerBalance(
+        tellerEntity, tellerDenominationCommand.expectedBalance(), tellerDenomination.getCountedTotal()
+    ).ifPresent(tellerDenominationEntity::setAdjustingJournalEntry);
+
+    this.tellerDenominationRepository.save(tellerDenominationEntity);
+
+    return tellerCode;
+  }
+
   private boolean checkPreconditions(final String officeIdentifier, final Teller teller) {
     boolean pass = true;
 
@@ -366,6 +400,48 @@ public class TellerAggregate {
     }
 
     return journalEntry;
+  }
+
+  private Optional<String> adjustDenominatedTellerBalance(final TellerEntity tellerEntity,
+                                              final BigDecimal expectedBalance,
+                                              final BigDecimal countedTotal) {
+    if (expectedBalance.compareTo(countedTotal) != 0) {
+      final JournalEntry journalEntry = new JournalEntry();
+      journalEntry.setTransactionIdentifier(RandomStringUtils.randomNumeric(32));
+      journalEntry.setTransactionDate(DateConverter.toIsoString(LocalDateTime.now(Clock.systemUTC())));
+      journalEntry.setClerk(UserContextHolder.checkedGetUser());
+      journalEntry.setMessage("Teller denomination adjustment.");
+
+      final Debtor debtor = new Debtor();
+      final Creditor creditor = new Creditor();
+      final BigDecimal adjustment = expectedBalance.subtract(countedTotal);
+      if (adjustment.signum() == -1) {
+        final BigDecimal value = adjustment.negate();
+        journalEntry.setTransactionType(ServiceConstants.TX_DEPOSIT_ADJUSTMENT);
+
+        debtor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
+        debtor.setAmount(value.toString());
+        journalEntry.setDebtors(Sets.newHashSet(debtor));
+
+        creditor.setAccountNumber(tellerEntity.getCashOverShortAccount());
+        creditor.setAmount(value.toString());
+        journalEntry.setCreditors(Sets.newHashSet(creditor));
+      } else {
+        journalEntry.setTransactionType(ServiceConstants.TX_CREDIT_ADJUSTMENT);
+
+        debtor.setAccountNumber(tellerEntity.getCashOverShortAccount());
+        debtor.setAmount(adjustment.toString());
+        journalEntry.setDebtors(Sets.newHashSet(debtor));
+
+        creditor.setAccountNumber(tellerEntity.getTellerAccountIdentifier());
+        creditor.setAmount(adjustment.toString());
+        journalEntry.setCreditors(Sets.newHashSet(creditor));
+      }
+
+      this.accountingService.postJournalEntry(journalEntry);
+      return Optional.of(journalEntry.getTransactionIdentifier());
+    }
+    return Optional.empty();
   }
 }
 

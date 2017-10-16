@@ -44,6 +44,9 @@ public class Teller {
   private String vaultAccountIdentifier;
   @ValidIdentifier(maxLength = 34)
   private String chequesReceivableAccount;
+  @ValidIdentifier(maxLength = 34)
+  private String cashOverShortAccount;
+  private Boolean denominationRequired = Boolean.FALSE;
   private String assignedEmployee;
   private State state;
   private String createdBy;
@@ -103,6 +106,22 @@ public class Teller {
 
   public void setChequesReceivableAccount(final String chequesReceivableAccount) {
     this.chequesReceivableAccount = chequesReceivableAccount;
+  }
+
+  public String getCashOverShortAccount() {
+    return this.cashOverShortAccount;
+  }
+
+  public void setCashOverShortAccount(final String cashOverShortAccount) {
+    this.cashOverShortAccount = cashOverShortAccount;
+  }
+
+  public Boolean getDenominationRequired() {
+    return this.denominationRequired;
+  }
+
+  public void setDenominationRequired(final Boolean denominationRequired) {
+    this.denominationRequired = denominationRequired;
   }
 
   public String getAssignedEmployee() {
