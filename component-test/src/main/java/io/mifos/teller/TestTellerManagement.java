@@ -51,9 +51,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -95,7 +98,7 @@ public class TestTellerManagement extends AbstractTellerTest {
 
 
   @Test(expected = TellerAlreadyExistsException.class)
-  public void shouldCreateTellerAlreadyExists() throws Exception {
+  public void shouldNotCreateTellerAlreadyExists() throws Exception {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
     final Teller teller = TellerGenerator.createRandomTeller();
 
@@ -104,9 +107,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -125,9 +131,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -178,9 +187,13 @@ public class TestTellerManagement extends AbstractTellerTest {
     tellerToCreate.forEach(teller -> {
       Mockito.doAnswer(invocation -> Optional.of(new Account()))
           .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
       Mockito.doAnswer(invocation -> Optional.of(new Account()))
           .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+      Mockito.doAnswer(invocation -> Optional.of(new Account()))
+          .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
+
 
       super.testSubject.create(officeIdentifier, teller);
 
@@ -216,9 +229,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -246,9 +262,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -270,9 +289,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -296,9 +318,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -324,9 +349,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -355,9 +383,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -390,9 +421,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -431,9 +465,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -456,10 +493,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
-
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
     super.testSubject.create(officeIdentifier, teller);
 
     super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode());
@@ -485,6 +524,14 @@ public class TestTellerManagement extends AbstractTellerTest {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
     final Teller teller = TellerGenerator.createRandomTeller();
     teller.setCashdrawLimit(BigDecimal.valueOf(0.00001D));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
   }
@@ -494,6 +541,14 @@ public class TestTellerManagement extends AbstractTellerTest {
     final String officeIdentifier = RandomStringUtils.randomAlphabetic(32);
     final Teller teller = TellerGenerator.createRandomTeller();
     teller.setCashdrawLimit(BigDecimal.valueOf(2000000000));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
   }
@@ -509,9 +564,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
 
@@ -550,9 +608,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
@@ -575,9 +636,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));
@@ -608,9 +672,12 @@ public class TestTellerManagement extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(teller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, teller);
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, teller.getCode()));

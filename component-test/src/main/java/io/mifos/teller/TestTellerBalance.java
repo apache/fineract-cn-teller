@@ -54,9 +54,12 @@ public class TestTellerBalance extends AbstractTellerTest {
 
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(randomTeller.getTellerAccountIdentifier()));
-
     Mockito.doAnswer(invocation -> Optional.of(new Account()))
         .when(super.accountingServiceSpy).findAccount(Matchers.eq(randomTeller.getVaultAccountIdentifier()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(randomTeller.getChequesReceivableAccount()));
+    Mockito.doAnswer(invocation -> Optional.of(new Account()))
+        .when(super.accountingServiceSpy).findAccount(Matchers.eq(randomTeller.getCashOverShortAccount()));
 
     super.testSubject.create(officeIdentifier, randomTeller);
     Assert.assertTrue(super.eventRecorder.wait(EventConstants.POST_TELLER, randomTeller.getCode()));
