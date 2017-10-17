@@ -136,6 +136,10 @@ public class TellerAggregate {
         tellerEntity.setVaultAccountIdentifier(teller.getVaultAccountIdentifier());
         tellerEntity.setChequesReceivableAccount(teller.getChequesReceivableAccount());
         tellerEntity.setCashdrawLimit(teller.getCashdrawLimit());
+        tellerEntity.setCashOverShortAccount(teller.getCashOverShortAccount());
+        tellerEntity.setDenominationRequired(
+            teller.getDenominationRequired() != null ? teller.getDenominationRequired() : Boolean.FALSE
+        );
         tellerEntity.setLastModifiedBy(UserContextHolder.checkedGetUser());
         tellerEntity.setLastModifiedOn(LocalDateTime.now(Clock.systemUTC()));
 
