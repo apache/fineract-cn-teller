@@ -15,6 +15,7 @@
 --
 
 ALTER TABLE tajet_teller ADD cash_over_short_account VARCHAR(34) NULL;
+ALTER TABLE tajet_teller ADD denomination_required BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE tajet_teller_denominations (
   id                      BIGINT        NOT NULL AUTO_INCREMENT,

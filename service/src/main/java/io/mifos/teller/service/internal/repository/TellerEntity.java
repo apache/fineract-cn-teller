@@ -53,6 +53,8 @@ public class TellerEntity {
   private String chequesReceivableAccount;
   @Column(name = "cash_over_short_account", nullable = false, length = 34)
   private String cashOverShortAccount;
+  @Column(name = "denomination_required", nullable = false)
+  private Boolean denominationRequired;
   @Column(name = "assigned_employee_identifier", nullable = true, length = 32)
   private String assignedEmployeeIdentifier;
   @Column(name = "a_state", nullable = false, length = 256)
@@ -156,6 +158,14 @@ public class TellerEntity {
 
   public void setCashOverShortAccount(final String cashOverShortAccount) {
     this.cashOverShortAccount = cashOverShortAccount;
+  }
+
+  public Boolean getDenominationRequired() {
+    return this.denominationRequired;
+  }
+
+  public void setDenominationRequired(final Boolean denominationRequired) {
+    this.denominationRequired = denominationRequired;
   }
 
   public String getAssignedEmployeeIdentifier() {
