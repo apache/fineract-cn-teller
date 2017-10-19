@@ -530,6 +530,7 @@ public class TestTellerOperation extends AbstractTellerTest {
 
     final Account account = new Account();
     account.setState(Account.State.OPEN.name());
+    account.setBalance(2000.00D);
     Mockito.doAnswer(invocation -> Optional.of(account))
         .when(super.accountingServiceSpy).findAccount(openAccountTransaction.getCustomerAccountIdentifier());
     Mockito.doAnswer(invocation -> Collections.emptyList())

@@ -220,7 +220,8 @@ public class TellerOperationRestController {
                 .orElseThrow(() -> ServiceException.notFound("Transaction {0} not found.", tellerTransactionIdentifier));
 
         this.verifyAccounts(tellerTransaction);
-        this.verifyWithdrawalTransaction(tellerTransactionIdentifier, confirmTellerTransactionCommand);
+        this.verifyDepositTransaction(tellerTransaction, confirmTellerTransactionCommand);
+        this.verifyWithdrawalTransaction(tellerTransaction, confirmTellerTransactionCommand);
 
         this.commandGateway.process(confirmTellerTransactionCommand);
         break;
@@ -288,13 +289,8 @@ public class TellerOperationRestController {
     }
   }
 
-  private void verifyWithdrawalTransaction(final String tellerTransactionIdentifier,
+  private void verifyWithdrawalTransaction(final TellerTransaction tellerTransaction,
                                            final ConfirmTellerTransactionCommand confirmTellerTransactionCommand) {
-
-    final TellerTransaction tellerTransaction =
-        this.tellerOperationService.getTellerTransaction(tellerTransactionIdentifier)
-            .orElseThrow(() -> ServiceException.notFound("Transaction {0} not found.", tellerTransactionIdentifier));
-
     final String transactionType = tellerTransaction.getTransactionType();
 
     if (transactionType.equals(ServiceConstants.TX_ACCOUNT_TRANSFER)
@@ -321,6 +317,29 @@ public class TellerOperationRestController {
         if (currentBalance.compareTo(transactionAmount) > 0) {
           throw ServiceException.conflict("Account has remaining balance.");
         }
+      }
+    }
+  }
+
+  private void verifyDepositTransaction(final TellerTransaction tellerTransaction,
+                                        final ConfirmTellerTransactionCommand confirmTellerTransactionCommand) {
+    final String transactionType = tellerTransaction.getTransactionType();
+
+    if (transactionType.equals(ServiceConstants.TX_CASH_DEPOSIT)
+        || transactionType.equals(ServiceConstants.TX_OPEN_ACCOUNT)) {
+
+      final Account account = this.accountingService.findAccount(tellerTransaction.getCustomerAccountIdentifier())
+          .orElseThrow(() -> ServiceException.notFound("Customer account {0} not found.",
+              tellerTransaction.getCustomerAccountIdentifier()));
+
+      final BigDecimal newBalance = BigDecimal.valueOf(account.getBalance()).add(tellerTransaction.getAmount());
+
+      final TellerTransactionCosts tellerTransactionCosts =
+          this.tellerTransactionProcessor.getCosts(tellerTransaction);
+
+      if (!confirmTellerTransactionCommand.chargesIncluded() &&
+          tellerTransactionCosts.getTotalAmount().compareTo(newBalance) > 0) {
+        throw ServiceException.conflict("Account has not enough balance.");
       }
     }
   }
