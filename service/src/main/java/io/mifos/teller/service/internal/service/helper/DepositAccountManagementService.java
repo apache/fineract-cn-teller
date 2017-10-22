@@ -102,6 +102,10 @@ public class DepositAccountManagementService {
     this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.CLOSE_PRODUCT_INSTANCE_COMMAND);
   }
 
+  public void transactedProductInstance(final String customerAccountIdentifier) {
+    this.depositAccountManager.postProductInstanceCommand(customerAccountIdentifier, EventConstants.PRODUCT_INSTANCE_TRANSACTION);
+  }
+
   public ProductDefinition findProductDefinition(final String productIdentifier) {
     return this.depositAccountManager.findProductDefinition(productIdentifier);
   }

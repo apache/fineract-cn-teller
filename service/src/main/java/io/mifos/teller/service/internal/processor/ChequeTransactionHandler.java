@@ -23,6 +23,7 @@ import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.ChequeService;
+import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,16 +38,19 @@ public class ChequeTransactionHandler {
   private final ChequeService chequeService;
   private final TellerRepository tellerRepository;
   private final AccountingService accountingService;
+  private final DepositAccountManagementService depositAccountManagementService;
 
   @Autowired
   public ChequeTransactionHandler(@Qualifier(ServiceConstants.LOGGER_NAME) final Logger logger,
                                   final ChequeService chequeService,
                                   final TellerRepository tellerRepository,
-                                  final AccountingService accountingService) {
+                                  final AccountingService accountingService,
+                                  final DepositAccountManagementService depositAccountManagementService) {
     super();
     this.logger = logger;this.chequeService = chequeService;
     this.tellerRepository = tellerRepository;
     this.accountingService = accountingService;
+    this.depositAccountManagementService = depositAccountManagementService;
   }
 
   public void processCheque(final String tellerCode, final TellerTransaction tellerTransaction) {
@@ -60,5 +64,6 @@ public class ChequeTransactionHandler {
     chequeTransaction.setCheque(ChequeMapper.map(tellerTransaction.getCheque()));
 
     this.chequeService.process(chequeTransaction);
+    this.depositAccountManagementService.transactedProductInstance(tellerTransaction.getCustomerAccountIdentifier());
   }
 }
