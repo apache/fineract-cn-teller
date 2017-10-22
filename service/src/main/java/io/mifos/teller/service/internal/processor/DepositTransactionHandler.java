@@ -119,6 +119,7 @@ public class DepositTransactionHandler {
     creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
 
     this.accountingService.postJournalEntry(journalEntry);
+    this.depositAccountManagementService.transactedProductInstance(resolvedCustomerAccount);
   }
 
   public void processCashDeposit(final String tellerCode, final TellerTransaction tellerTransaction,
@@ -159,6 +160,7 @@ public class DepositTransactionHandler {
     creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
 
     this.accountingService.postJournalEntry(journalEntry);
+    this.depositAccountManagementService.transactedProductInstance(resolvedCustomerAccount);
   }
 
   public void processCashWithdrawal(final String tellerCode, final TellerTransaction tellerTransaction,
@@ -203,6 +205,7 @@ public class DepositTransactionHandler {
     creditors.addAll(this.createChargeCreditors(tellerTransactionCosts));
 
     this.accountingService.postJournalEntry(journalEntry);
+    this.depositAccountManagementService.transactedProductInstance(resolvedCustomerAccount);
   }
 
   public void processDepositAccountClosing(final String tellerCode, final TellerTransaction tellerTransaction,
