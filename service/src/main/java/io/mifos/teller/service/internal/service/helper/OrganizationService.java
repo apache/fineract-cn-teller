@@ -18,10 +18,10 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
-import io.mifos.office.api.v1.client.NotFoundException;
-import io.mifos.office.api.v1.client.OrganizationManager;
-import io.mifos.office.api.v1.domain.ExternalReference;
 import io.mifos.teller.ServiceConstants;
+import org.apache.fineract.cn.office.api.v1.client.NotFoundException;
+import org.apache.fineract.cn.office.api.v1.client.OrganizationManager;
+import org.apache.fineract.cn.office.api.v1.domain.ExternalReference;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

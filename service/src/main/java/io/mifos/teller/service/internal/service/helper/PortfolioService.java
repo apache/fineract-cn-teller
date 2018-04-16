@@ -19,31 +19,30 @@
 package io.mifos.teller.service.internal.service.helper;
 
 import com.google.common.collect.Sets;
-import io.mifos.core.api.util.NotFoundException;
-import io.mifos.core.lang.DateConverter;
-import io.mifos.core.lang.ServiceException;
-import io.mifos.individuallending.api.v1.domain.product.AccountDesignators;
-import io.mifos.individuallending.api.v1.domain.workflow.Action;
-import io.mifos.office.api.v1.client.BadRequestException;
-import io.mifos.portfolio.api.v1.client.PortfolioManager;
-import io.mifos.portfolio.api.v1.domain.AccountAssignment;
-import io.mifos.portfolio.api.v1.domain.ChargeDefinition;
-import io.mifos.portfolio.api.v1.domain.Command;
-import io.mifos.portfolio.api.v1.domain.CostComponent;
-import io.mifos.portfolio.api.v1.domain.Payment;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.apache.fineract.cn.individuallending.api.v1.domain.product.AccountDesignators;
+import org.apache.fineract.cn.individuallending.api.v1.domain.workflow.Action;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.apache.fineract.cn.lang.ServiceException;
+import org.apache.fineract.cn.office.api.v1.client.BadRequestException;
+import org.apache.fineract.cn.office.api.v1.client.NotFoundException;
+import org.apache.fineract.cn.portfolio.api.v1.client.PortfolioManager;
+import org.apache.fineract.cn.portfolio.api.v1.domain.AccountAssignment;
+import org.apache.fineract.cn.portfolio.api.v1.domain.ChargeDefinition;
+import org.apache.fineract.cn.portfolio.api.v1.domain.Command;
+import org.apache.fineract.cn.portfolio.api.v1.domain.CostComponent;
+import org.apache.fineract.cn.portfolio.api.v1.domain.Payment;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 @Service
 public class PortfolioService {
@@ -86,7 +85,7 @@ public class PortfolioService {
           charges.add(charge);
         }
       });
-    } catch (final NotFoundException |  BadRequestException ex) {
+    } catch (final NotFoundException | BadRequestException ex) {
       throw ServiceException.internalError(
           "Could not fetch portfolio information, reason: {0}", ex.getCause() + " - " + ex.getMessage()
       );

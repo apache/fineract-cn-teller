@@ -18,7 +18,6 @@
  */
 package io.mifos.teller;
 
-import io.mifos.accounting.api.v1.domain.Account;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerAlreadyExistsException;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
@@ -27,16 +26,16 @@ import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.util.TellerGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 public class TestTellerManagement extends AbstractTellerTest {
 

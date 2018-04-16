@@ -18,9 +18,6 @@
  */
 package io.mifos.teller.api.v1.client;
 
-import io.mifos.core.api.annotation.ThrowsException;
-import io.mifos.core.api.annotation.ThrowsExceptions;
-import io.mifos.core.api.util.CustomFeignClientsConfiguration;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
 import io.mifos.teller.api.v1.domain.TellerDenomination;
@@ -28,6 +25,11 @@ import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
+import java.util.List;
+import javax.validation.Valid;
+import org.apache.fineract.cn.api.annotation.ThrowsException;
+import org.apache.fineract.cn.api.annotation.ThrowsExceptions;
+import org.apache.fineract.cn.api.util.CustomFeignClientsConfiguration;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,9 +38,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @FeignClient(value = "teller-v1", path = "/teller/v1", configuration = CustomFeignClientsConfiguration.class)
 public interface TellerManager {

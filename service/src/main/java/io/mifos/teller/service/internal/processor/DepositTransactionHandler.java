@@ -18,12 +18,6 @@
  */
 package io.mifos.teller.service.internal.processor;
 
-import io.mifos.accounting.api.v1.domain.Creditor;
-import io.mifos.accounting.api.v1.domain.Debtor;
-import io.mifos.accounting.api.v1.domain.JournalEntry;
-import io.mifos.core.api.util.UserContextHolder;
-import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
-import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
@@ -32,17 +26,22 @@ import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.fineract.cn.accounting.api.v1.domain.Creditor;
+import org.apache.fineract.cn.accounting.api.v1.domain.Debtor;
+import org.apache.fineract.cn.accounting.api.v1.domain.JournalEntry;
+import org.apache.fineract.cn.api.util.UserContextHolder;
+import org.apache.fineract.cn.deposit.api.v1.definition.domain.ProductDefinition;
+import org.apache.fineract.cn.deposit.api.v1.instance.domain.ProductInstance;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DepositTransactionHandler {

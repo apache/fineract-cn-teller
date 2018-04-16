@@ -18,13 +18,12 @@
  */
 package io.mifos.teller.api.v1.domain;
 
-import io.mifos.core.lang.validation.constraints.ValidIdentifier;
-
+import java.math.BigDecimal;
 import javax.validation.Valid;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
+import org.apache.fineract.cn.lang.validation.constraints.ValidIdentifier;
 
 public class TellerTransaction {
 

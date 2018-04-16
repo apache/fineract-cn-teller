@@ -19,10 +19,6 @@
 package io.mifos.teller;
 
 import com.google.common.collect.Lists;
-import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.core.lang.DateConverter;
-import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
-import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerNotFoundException;
 import io.mifos.teller.api.v1.client.TellerTransactionValidationException;
@@ -37,19 +33,22 @@ import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.service.internal.service.helper.ChequeService;
 import io.mifos.teller.util.TellerGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.apache.fineract.cn.deposit.api.v1.definition.domain.ProductDefinition;
+import org.apache.fineract.cn.deposit.api.v1.instance.domain.ProductInstance;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 public class TestTellerOperation extends AbstractTellerTest {
 

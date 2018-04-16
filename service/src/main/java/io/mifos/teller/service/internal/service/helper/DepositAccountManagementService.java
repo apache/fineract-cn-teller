@@ -18,19 +18,10 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
-import io.mifos.deposit.api.v1.EventConstants;
-import io.mifos.deposit.api.v1.client.DepositAccountManager;
-import io.mifos.deposit.api.v1.definition.domain.Action;
-import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
-import io.mifos.deposit.api.v1.instance.domain.ProductInstance;
+import org.apache.fineract.cn.deposit.api.v1.definition.domain.Action;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -38,6 +29,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import org.apache.fineract.cn.deposit.api.v1.EventConstants;
+import org.apache.fineract.cn.deposit.api.v1.client.DepositAccountManager;
+import org.apache.fineract.cn.deposit.api.v1.definition.domain.ProductDefinition;
+import org.apache.fineract.cn.deposit.api.v1.instance.domain.ProductInstance;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DepositAccountManagementService {
@@ -71,7 +70,7 @@ public class DepositAccountManagementService {
     actions.forEach(action -> mappedActions.put(action.getIdentifier(), action));
 
     final MathContext mathContext = new MathContext(2, RoundingMode.HALF_EVEN);
-    final Set<io.mifos.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
+    final Set<org.apache.fineract.cn.deposit.api.v1.definition.domain.Charge> productCharges = productDefinition.getCharges();
     productCharges.forEach(productCharge -> {
       if (productCharge.getAmount() > 0.00D) {
         final Action action = mappedActions.get(productCharge.getActionIdentifier());

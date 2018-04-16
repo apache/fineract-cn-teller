@@ -19,10 +19,6 @@
 package io.mifos.teller;
 
 import com.google.common.collect.Lists;
-import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.accounting.api.v1.domain.AccountEntry;
-import io.mifos.accounting.api.v1.domain.AccountEntryPage;
-import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.domain.Cheque;
 import io.mifos.teller.api.v1.domain.MICR;
@@ -33,17 +29,20 @@ import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.util.TellerGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntry;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntryPage;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 public class TestTellerBalance extends AbstractTellerTest {
 

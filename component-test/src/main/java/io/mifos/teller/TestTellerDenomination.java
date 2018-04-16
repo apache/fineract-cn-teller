@@ -19,11 +19,6 @@
 package io.mifos.teller;
 
 import com.google.common.collect.Lists;
-import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.accounting.api.v1.domain.AccountEntry;
-import io.mifos.accounting.api.v1.domain.AccountEntryPage;
-import io.mifos.accounting.api.v1.domain.JournalEntry;
-import io.mifos.core.lang.DateRange;
 import io.mifos.teller.api.v1.EventConstants;
 import io.mifos.teller.api.v1.client.TellerValidationException;
 import io.mifos.teller.api.v1.domain.Teller;
@@ -31,17 +26,21 @@ import io.mifos.teller.api.v1.domain.TellerDenomination;
 import io.mifos.teller.api.v1.domain.TellerManagementCommand;
 import io.mifos.teller.api.v1.domain.UnlockDrawerCommand;
 import io.mifos.teller.util.TellerGenerator;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mockito;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntry;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntryPage;
+import org.apache.fineract.cn.accounting.api.v1.domain.JournalEntry;
+import org.apache.fineract.cn.lang.DateRange;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 public class TestTellerDenomination extends AbstractTellerTest {
 

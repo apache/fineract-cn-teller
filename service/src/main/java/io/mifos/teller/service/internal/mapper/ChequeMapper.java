@@ -18,21 +18,21 @@
  */
 package io.mifos.teller.service.internal.mapper;
 
-import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.domain.Cheque;
 import io.mifos.teller.api.v1.domain.MICR;
 import io.mifos.teller.service.internal.repository.ChequeEntity;
+import org.apache.fineract.cn.lang.DateConverter;
 
 public class ChequeMapper {
   private ChequeMapper() {
     super();
   }
 
-  public static io.mifos.cheque.api.v1.domain.Cheque map(final Cheque tellerCheque) {
-    final io.mifos.cheque.api.v1.domain.Cheque cheque = new io.mifos.cheque.api.v1.domain.Cheque();
+  public static org.apache.fineract.cn.cheque.api.v1.domain.Cheque map(final Cheque tellerCheque) {
+    final org.apache.fineract.cn.cheque.api.v1.domain.Cheque cheque = new org.apache.fineract.cn.cheque.api.v1.domain.Cheque();
 
     final MICR tellerChequeMicr = tellerCheque.getMicr();
-    final io.mifos.cheque.api.v1.domain.MICR micr = new io.mifos.cheque.api.v1.domain.MICR();
+    final org.apache.fineract.cn.cheque.api.v1.domain.MICR micr = new org.apache.fineract.cn.cheque.api.v1.domain.MICR();
     micr.setChequeNumber(tellerChequeMicr.getChequeNumber());
     micr.setBranchSortCode(tellerChequeMicr.getBranchSortCode());
     micr.setAccountNumber(tellerChequeMicr.getAccountNumber());

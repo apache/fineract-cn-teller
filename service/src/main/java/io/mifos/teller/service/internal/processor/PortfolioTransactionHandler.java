@@ -18,7 +18,6 @@
  */
 package io.mifos.teller.service.internal.processor;
 
-import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Charge;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
@@ -26,14 +25,14 @@ import io.mifos.teller.api.v1.domain.TellerTransactionCosts;
 import io.mifos.teller.service.internal.repository.TellerEntity;
 import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.PortfolioService;
-import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.fineract.cn.lang.ServiceException;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PortfolioTransactionHandler {

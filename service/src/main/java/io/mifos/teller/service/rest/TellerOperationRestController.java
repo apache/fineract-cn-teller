@@ -18,14 +18,6 @@
  */
 package io.mifos.teller.service.rest;
 
-import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.anubis.annotation.AcceptedTokenType;
-import io.mifos.anubis.annotation.Permittable;
-import io.mifos.core.api.util.UserContextHolder;
-import io.mifos.core.command.gateway.CommandGateway;
-import io.mifos.core.lang.DateConverter;
-import io.mifos.core.lang.ServiceException;
-import io.mifos.deposit.api.v1.definition.domain.ProductDefinition;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.PermittableGroupIds;
 import io.mifos.teller.api.v1.domain.MICR;
@@ -46,6 +38,19 @@ import io.mifos.teller.service.internal.service.helper.ChequeService;
 import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
 import io.mifos.teller.service.internal.service.helper.OrganizationService;
 import io.mifos.teller.service.internal.util.MICRParser;
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
+import javax.validation.Valid;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.apache.fineract.cn.anubis.annotation.AcceptedTokenType;
+import org.apache.fineract.cn.anubis.annotation.Permittable;
+import org.apache.fineract.cn.api.util.UserContextHolder;
+import org.apache.fineract.cn.command.gateway.CommandGateway;
+import org.apache.fineract.cn.deposit.api.v1.definition.domain.ProductDefinition;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.apache.fineract.cn.lang.ServiceException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,12 +63,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/teller/{tellerCode}")

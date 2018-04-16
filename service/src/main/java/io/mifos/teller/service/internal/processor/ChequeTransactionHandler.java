@@ -18,7 +18,6 @@
  */
 package io.mifos.teller.service.internal.processor;
 
-import io.mifos.cheque.api.v1.domain.ChequeTransaction;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.service.internal.mapper.ChequeMapper;
@@ -27,12 +26,12 @@ import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
 import io.mifos.teller.service.internal.service.helper.ChequeService;
 import io.mifos.teller.service.internal.service.helper.DepositAccountManagementService;
+import java.util.Optional;
+import org.apache.fineract.cn.cheque.api.v1.domain.ChequeTransaction;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class ChequeTransactionHandler {

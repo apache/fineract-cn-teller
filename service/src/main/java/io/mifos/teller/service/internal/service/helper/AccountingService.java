@@ -18,22 +18,21 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
-import io.mifos.accounting.api.v1.client.AccountNotFoundException;
-import io.mifos.accounting.api.v1.client.LedgerManager;
-import io.mifos.accounting.api.v1.domain.Account;
-import io.mifos.accounting.api.v1.domain.AccountCommand;
-import io.mifos.accounting.api.v1.domain.AccountEntryPage;
-import io.mifos.accounting.api.v1.domain.AccountPage;
-import io.mifos.accounting.api.v1.domain.JournalEntry;
-import io.mifos.core.lang.ServiceException;
 import io.mifos.teller.ServiceConstants;
+import java.util.Optional;
+import org.apache.fineract.cn.accounting.api.v1.client.AccountNotFoundException;
+import org.apache.fineract.cn.accounting.api.v1.client.LedgerManager;
+import org.apache.fineract.cn.accounting.api.v1.domain.Account;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountCommand;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntryPage;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountPage;
+import org.apache.fineract.cn.accounting.api.v1.domain.JournalEntry;
+import org.apache.fineract.cn.lang.ServiceException;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class AccountingService {

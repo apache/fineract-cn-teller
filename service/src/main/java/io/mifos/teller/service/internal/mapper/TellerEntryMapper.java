@@ -18,10 +18,9 @@
  */
 package io.mifos.teller.service.internal.mapper;
 
-import io.mifos.accounting.api.v1.domain.AccountEntry;
 import io.mifos.teller.api.v1.domain.TellerEntry;
-
 import java.math.BigDecimal;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntry;
 
 public class TellerEntryMapper {
 

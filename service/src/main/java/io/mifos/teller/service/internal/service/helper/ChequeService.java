@@ -18,10 +18,10 @@
  */
 package io.mifos.teller.service.internal.service.helper;
 
-import io.mifos.cheque.api.v1.client.ChequeManager;
-import io.mifos.cheque.api.v1.domain.ChequeTransaction;
-import io.mifos.core.api.util.NotFoundException;
 import io.mifos.teller.ServiceConstants;
+import org.apache.fineract.cn.api.util.NotFoundException;
+import org.apache.fineract.cn.cheque.api.v1.client.ChequeManager;
+import org.apache.fineract.cn.cheque.api.v1.domain.ChequeTransaction;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

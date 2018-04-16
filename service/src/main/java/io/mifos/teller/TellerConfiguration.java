@@ -18,19 +18,19 @@
  */
 package io.mifos.teller;
 
-import io.mifos.accounting.api.v1.client.LedgerManager;
-import io.mifos.anubis.config.EnableAnubis;
-import io.mifos.cheque.api.v1.client.ChequeManager;
-import io.mifos.core.async.config.EnableAsync;
-import io.mifos.core.cassandra.config.EnableCassandra;
-import io.mifos.core.command.config.EnableCommandProcessing;
-import io.mifos.core.lang.config.EnableServiceException;
-import io.mifos.core.lang.config.EnableTenantContext;
-import io.mifos.core.mariadb.config.EnableMariaDB;
-import io.mifos.deposit.api.v1.client.DepositAccountManager;
-import io.mifos.office.api.v1.client.OrganizationManager;
-import io.mifos.portfolio.api.v1.client.PortfolioManager;
-import io.mifos.tool.crypto.config.EnableCrypto;
+import org.apache.fineract.cn.accounting.api.v1.client.LedgerManager;
+import org.apache.fineract.cn.anubis.config.EnableAnubis;
+import org.apache.fineract.cn.async.config.EnableAsync;
+import org.apache.fineract.cn.cassandra.config.EnableCassandra;
+import org.apache.fineract.cn.cheque.api.v1.client.ChequeManager;
+import org.apache.fineract.cn.command.config.EnableCommandProcessing;
+import org.apache.fineract.cn.crypto.config.EnableCrypto;
+import org.apache.fineract.cn.deposit.api.v1.client.DepositAccountManager;
+import org.apache.fineract.cn.lang.config.EnableServiceException;
+import org.apache.fineract.cn.lang.config.EnableTenantContext;
+import org.apache.fineract.cn.mariadb.config.EnableMariaDB;
+import org.apache.fineract.cn.office.api.v1.client.OrganizationManager;
+import org.apache.fineract.cn.portfolio.api.v1.client.PortfolioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

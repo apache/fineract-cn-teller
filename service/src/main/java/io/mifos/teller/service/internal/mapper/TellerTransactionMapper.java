@@ -18,9 +18,9 @@
  */
 package io.mifos.teller.service.internal.mapper;
 
-import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.api.v1.domain.TellerTransaction;
 import io.mifos.teller.service.internal.repository.TellerTransactionEntity;
+import org.apache.fineract.cn.lang.DateConverter;
 
 public class TellerTransactionMapper {
 

@@ -18,8 +18,8 @@
  */
 package io.mifos.teller.service.internal.repository;
 
-import io.mifos.core.mariadb.util.LocalDateTimeConverter;
-
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -29,8 +29,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import org.apache.fineract.cn.mariadb.util.LocalDateTimeConverter;
 
 @Entity
 @Table(name = "tajet_teller_denominations")

@@ -18,8 +18,6 @@
  */
 package io.mifos.teller.service.internal.service;
 
-import io.mifos.accounting.api.v1.domain.AccountEntryPage;
-import io.mifos.core.lang.DateConverter;
 import io.mifos.teller.ServiceConstants;
 import io.mifos.teller.api.v1.domain.Teller;
 import io.mifos.teller.api.v1.domain.TellerBalanceSheet;
@@ -35,9 +33,6 @@ import io.mifos.teller.service.internal.repository.TellerRepository;
 import io.mifos.teller.service.internal.repository.TellerTransactionEntity;
 import io.mifos.teller.service.internal.repository.TellerTransactionRepository;
 import io.mifos.teller.service.internal.service.helper.AccountingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -47,6 +42,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.fineract.cn.accounting.api.v1.domain.AccountEntryPage;
+import org.apache.fineract.cn.lang.DateConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TellerManagementService {
