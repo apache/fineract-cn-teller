@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ echo 'sROdHiJEPhkxqDECxLbzVfq37C06mP35 Processed Cheque' | http POST 'http://localhost:8080/teller/v1/teller/sROdHiJEPhkxqDECxLbzVfq37C06mP35/transactions/null' 'Content-Type:application/json' 'Accept:application/json'
+----

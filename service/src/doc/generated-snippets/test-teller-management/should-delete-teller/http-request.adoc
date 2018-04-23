@@ -1,0 +1,8 @@
+[source,http,options="nowrap"]
+----
+DELETE /teller/v1/offices/ddBmjFcGttOGfSeSaUidkssFNzxKfSvg/teller/f5PPDcAt5iZHuQAl8YFlZsbR0Trxj96Z HTTP/1.1
+Accept: */*
+Content-Type: application/json
+Host: localhost:8080
+
+----

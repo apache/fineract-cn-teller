@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/teller/v1/offices/ddBmjFcGttOGfSeSaUidkssFNzxKfSvg/teller/f5PPDcAt5iZHuQAl8YFlZsbR0Trxj96Z' -i -X DELETE -H 'Accept: */*' -H 'Content-Type: application/json'
+----
