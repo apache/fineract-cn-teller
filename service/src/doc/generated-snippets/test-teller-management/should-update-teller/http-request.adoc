@@ -1,0 +1,10 @@
+[source,http,options="nowrap"]
+----
+PUT /teller/v1/offices/AoFoonLfESxeyEnREnlDaacOsjKhekly/teller/Vxi7lJmBS1kkkV8YhQbhkLEsKQGEGmIH HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Host: localhost:8080
+Content-Length: 32
+
+Vxi7lJmBS1kkkV8YhQbhkLEsKQGEGmIH
+----

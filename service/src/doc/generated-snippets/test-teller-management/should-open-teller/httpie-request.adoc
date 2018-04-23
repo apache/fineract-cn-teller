@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ echo 'nD6zhKriVMaz82QsGvmBxU4Ybl5uBVk4' | http POST 'http://localhost:8080/teller/v1/offices/VWhJfnWRWpyhnoiLBMBaRlEucUUvpXMZ/teller/nD6zhKriVMaz82QsGvmBxU4Ybl5uBVk4/commands/' 'Content-Type:application/json' 'Accept:application/json'
+----

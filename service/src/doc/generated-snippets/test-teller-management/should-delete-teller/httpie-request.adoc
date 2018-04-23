@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ http DELETE 'http://localhost:8080/teller/v1/offices/ddBmjFcGttOGfSeSaUidkssFNzxKfSvg/teller/f5PPDcAt5iZHuQAl8YFlZsbR0Trxj96Z' 'Accept:*/*' 'Content-Type:application/json'
+----

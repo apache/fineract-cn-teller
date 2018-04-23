@@ -1,0 +1,4 @@
+[source,bash]
+----
+$ curl 'http://localhost:8080/teller/v1/offices/HpKVRmQraeQuvmBOSCjAGIALykNDoJHp/teller/Xo8Yeh26VpMDPjPXTdGqWrXlRrU7pYMj/commands/' -i -X POST -H 'Content-Type: application/json' -H 'Accept: application/json' -d 'Xo8Yeh26VpMDPjPXTdGqWrXlRrU7pYMj'
+----
