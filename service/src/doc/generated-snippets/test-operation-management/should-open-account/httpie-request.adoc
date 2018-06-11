@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ echo 'sROdHiJEPhkxqDECxLbzVfq37C06mP35 Open' | http POST 'http://localhost:8080/teller/v1/teller/sROdHiJEPhkxqDECxLbzVfq37C06mP35/' 'Accept:application/json' 'Content-Type:application/json'
-----

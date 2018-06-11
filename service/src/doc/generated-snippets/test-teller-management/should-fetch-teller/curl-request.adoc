@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ curl 'http://localhost:8080/teller/v1/offices/LFFvhNRsoKmwTvsaGVOTrCLUeiVQXKGX/teller/' -i -H 'Accept: */*' -H 'Content-Type: application/json'
-----

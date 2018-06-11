@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ echo 'Vxi7lJmBS1kkkV8YhQbhkLEsKQGEGmIH' | http PUT 'http://localhost:8080/teller/v1/offices/AoFoonLfESxeyEnREnlDaacOsjKhekly/teller/Vxi7lJmBS1kkkV8YhQbhkLEsKQGEGmIH' 'Accept:application/json' 'Content-Type:application/json'
-----
