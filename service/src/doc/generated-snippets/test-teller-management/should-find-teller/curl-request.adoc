@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ curl 'http://localhost:8080/teller/v1/offices/LxNBXQEgxSsTXrJYZmEgnUxbBZaetbOY/teller/l7Xds0ujYRN3uEVA3kryDd54scRqqkDO' -i -H 'Accept: */*'
-----

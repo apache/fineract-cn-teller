@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ echo 'sROdHiJEPhkxqDECxLbzVfq37C06mP35 Withdrawn' | http POST 'http://localhost:8080/teller/v1/teller/sROdHiJEPhkxqDECxLbzVfq37C06mP35/transactions/' 'Content-Type:application/json' 'Accept:application/json'
-----

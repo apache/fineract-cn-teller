@@ -1,4 +1,0 @@
-[source,bash]
-----
-$ http GET 'http://localhost:8080/teller/v1/offices/LFFvhNRsoKmwTvsaGVOTrCLUeiVQXKGX/teller/' 'Accept:*/*' 'Content-Type:application/json'
-----
