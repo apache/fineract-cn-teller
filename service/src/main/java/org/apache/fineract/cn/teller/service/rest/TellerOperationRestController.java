@@ -157,7 +157,7 @@ public class TellerOperationRestController {
         this.commandGateway.process(new PauseTellerCommand(tellerCode));
         break;
       default :
-        throw ServiceException.badRequest("Unknonw command {0}", command);
+        throw ServiceException.badRequest("Unknown command {0}", command);
     }
     return ResponseEntity.accepted().build();
   }
@@ -175,7 +175,7 @@ public class TellerOperationRestController {
     final Teller teller = this.verifyTeller(tellerCode);
 
     if (!teller.getState().equals(Teller.State.ACTIVE.name())) {
-      throw ServiceException.conflict("Teller {0} ist not active.", tellerCode);
+      throw ServiceException.conflict("Teller {0} is not active.", tellerCode);
     }
 
     this.verifyEmployee(teller);
