@@ -55,9 +55,6 @@ public class TestTellerOperation extends AbstractTellerTest {
   private static Teller tellerUnderTest = null;
   private final BigDecimal commonAmount = BigDecimal.valueOf(1234.56D);
 
-  @MockBean
-  private ChequeService chequeService;
-
   public TestTellerOperation() {
     super();
   }
