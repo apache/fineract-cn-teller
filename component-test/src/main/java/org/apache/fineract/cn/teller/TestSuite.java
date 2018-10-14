@@ -29,7 +29,7 @@ import org.junit.runners.Suite;
         TestTellerOperation.class,
         TestTellerManagement.class,
         TestTellerBalance.class,
-        TestTellerDenomination.class,
+        TestTellerDenomination.class
 
 })
 public class TestSuite extends SuiteTestEnvironment {
