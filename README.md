@@ -1,4 +1,4 @@
-# Apache Fineract CN Teller
+# Apache Fineract CN Teller [![Build Status](https://api.travis-ci.com/apache/fineract-cn-teller.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-teller)
 
 This project provides management and operational functionality for teller operation.
 
