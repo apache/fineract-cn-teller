@@ -80,7 +80,7 @@ public class AbstractTellerTest extends SuiteTestEnvironment {
   static final String TEST_USER = "homer";
 
   @ClassRule
-  public static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, mariaDBInitializer);
+  public static TenantDataStoreContextTestRule tenantDataStoreContext = TenantDataStoreContextTestRule.forRandomTenantName(cassandraInitializer, postgreSQLInitializer);
 
   @Rule
   public final TenantApplicationSecurityEnvironmentTestRule tenantApplicationSecurityEnvironment
