@@ -16,7 +16,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-FROM openjdk:8-jdk-alpine
+FROM openjdk:8-jdk-alpine AS builder
+RUN mkdir builddir
+COPY . builddir
+WORKDIR builddir
+RUN ./gradlew publishToMavenLocal
+
+
+FROM openjdk:8-jdk-alpine AS runner
 
 ARG teller_port=2028
 
@@ -25,6 +32,6 @@ ENV server.max-http-header-size=16384 \
     server.port=$teller_port
 
 WORKDIR /tmp
-COPY teller-service-boot-0.1.0-BUILD-SNAPSHOT.jar .
+COPY --from=builder /builddir/service/build/libs/teller-service-boot-0.1.0-BUILD-SNAPSHOT.jar ./teller-service-boot.jar
 
-CMD ["java", "-jar", "teller-service-boot-0.1.0-BUILD-SNAPSHOT.jar"]
+CMD ["java", "-jar", "teller-service-boot.jar"]
