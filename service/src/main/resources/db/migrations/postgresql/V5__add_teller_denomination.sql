@@ -21,13 +21,12 @@ ALTER TABLE tajet_teller ADD cash_over_short_account VARCHAR(34) NULL;
 ALTER TABLE tajet_teller ADD denomination_required BOOLEAN NOT NULL DEFAULT FALSE;
 
 CREATE TABLE tajet_teller_denominations (
-  id                      BIGINT        NOT NULL AUTO_INCREMENT,
+  id                      BIGSERIAL     NOT NULL,
   teller_id               BIGINT        NOT NULL,
   counted_total           NUMERIC(15,5) NOT NULL,
   note                    VARCHAR(512)  NULL,
   adjusting_journal_entry VARCHAR(32)   NULL,
   created_on              TIMESTAMP(3)  NOT NULL,
   created_by              VARCHAR(32)   NOT NULL,
-  CONSTRAINT tajet_teller_denominations PRIMARY KEY (id),
-  CONSTRAINT tajet_teller_denominations_fk FOREIGN KEY (teller_id) REFERENCES tajet_teller (id)
-);
+  CONSTRAINT tajet_teller_denominations_pk PRIMARY KEY (id),
+  CONSTRAINT tajet_teller_denominations_fk FOREIGN KEY (teller_id) REFERENCES tajet_teller (id));

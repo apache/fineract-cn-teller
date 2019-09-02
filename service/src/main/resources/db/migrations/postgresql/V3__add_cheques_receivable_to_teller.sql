@@ -17,10 +17,8 @@
 -- under the License.
 --
 
-ALTER TABLE tajet_teller MODIFY teller_account_identifier VARCHAR(34);
-ALTER TABLE tajet_teller MODIFY vault_account_identifier VARCHAR(34);
+ALTER TABLE tajet_teller ALTER COLUMN teller_account_identifier TYPE VARCHAR(34);
+ALTER TABLE tajet_teller ALTER COLUMN vault_account_identifier TYPE VARCHAR(34);
 ALTER TABLE tajet_teller ADD cheques_receivable_account VARCHAR(34);
-
-
-ALTER TABLE tajet_teller_transactions MODIFY customer_account_identifier VARCHAR(34);
-ALTER TABLE tajet_teller_transactions MODIFY target_account_identifier VARCHAR(34);
+ALTER TABLE tajet_teller_transactions ALTER COLUMN customer_account_identifier TYPE VARCHAR(34);
+ALTER TABLE tajet_teller_transactions ALTER COLUMN target_account_identifier TYPE VARCHAR(34);

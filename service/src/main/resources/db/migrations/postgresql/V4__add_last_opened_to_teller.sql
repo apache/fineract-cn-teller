@@ -20,10 +20,4 @@
 ALTER TABLE tajet_teller ADD last_opened_by VARCHAR(32) NULL;
 ALTER TABLE tajet_teller ADD last_opened_on TIMESTAMP(3) NULL;
 
-UPDATE
-  tajet_teller
-SET
-  last_opened_by = last_modified_by,
-  last_opened_on = last_modified_on
-WHERE
-  last_modified_on IS NOT NULL;
+UPDATE tajet_teller SET last_opened_by = last_modified_by, last_opened_on = last_modified_on WHERE last_modified_on IS NOT NULL;

@@ -18,7 +18,7 @@
 --
 
 CREATE TABLE tajet_cheques (
-  id                       BIGINT         NOT NULL AUTO_INCREMENT,
+  id                       BIGSERIAL      NOT NULL,
   teller_transaction_id    BIGINT         NOT NULL,
   cheque_number            VARCHAR(8)     NOT NULL,
   branch_sort_code         VARCHAR(11)    NOT NULL,
@@ -31,5 +31,4 @@ CREATE TABLE tajet_cheques (
   open_cheque              BOOLEAN        NULL,
   CONSTRAINT tajet_cheques_pk PRIMARY KEY (id),
   CONSTRAINT tajet_cheques_uq UNIQUE (cheque_number, branch_sort_code, account_number),
-  CONSTRAINT tajet_cheques_teller_tx_fk FOREIGN KEY (teller_transaction_id) REFERENCES tajet_teller_transactions (id)
-)
+  CONSTRAINT tajet_cheques_teller_tx_fk FOREIGN KEY (teller_transaction_id) REFERENCES tajet_teller_transactions (id));
