@@ -1,6 +1,7 @@
-# Apache Fineract CN Teller [![Build Status](https://api.travis-ci.com/apache/fineract-cn-teller.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-teller)
+# Apache Fineract CN Teller [![Build Status](https://api.travis-ci.com/apache/fineract-cn-teller.svg?branch=develop)](https://travis-ci.com/apache/fineract-cn-teller)  [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/apache/fineract-cn-teller)](https://hub.docker.com/r/apache/fineract-cn-teller/builds)
 
 This project provides management and operational functionality for teller operation.
+[Read more](https://cwiki.apache.org/confluence/display/FINERACT/Fineract+CN+Project+Structure#FineractCNProjectStructure-teller).
 
 ## Versioning
 The version numbers follow the [Semantic Versioning](http://semver.org/) scheme.
