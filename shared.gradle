@@ -57,7 +57,7 @@ dependencyManagement {
 // override certain dependency provided by Spring platform using newer releases
 ext['cassandra.version'] = '3.6'
 ext['cassandra-driver.version'] = '3.1.2'
-ext['activemq.version'] = '5.13.2'
+ext['activemq.version'] = '5.15.9'
 ext['spring-data-releasetrain.version'] = 'Gosling-SR2A'
 
 dependencies {
