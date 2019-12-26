@@ -1,45 +1,37 @@
 name: Build & Push
 
-on:
-  push:
-    branches:
-      - develop
-  pull_request:
-    branches: 
-      - develop
+on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    env:
+      ECR_REGISTRY: 516580504223.dkr.ecr.ap-south-1.amazonaws.com
+      ECR_REPOSITORY: ${{ github.event.repository.name }}
+      DEV_REGISTRY: "516580504223"
 
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/cache@v1
-      with:
-        path: ~/.gradle/caches
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1.0.1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
-    - name: Login to Amazon ECR
-      id: login-ecr
-      with:
-        registries: "516580504223"
-      uses: aws-actions/amazon-ecr-login@v1.0.1
-    - name: Build, tag, and push image to Amazon ECR
-      env:
-        ECR_REGISTRY: 516580504223.dkr.ecr.ap-south-1.amazonaws.com
-        ECR_REPOSITORY: ${{ github.event.repository.name }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    - name: Logout of Amazon ECR
-      if: always()
-      run: docker logout ${{ steps.login-ecr.outputs.registry }}  
+      - uses: actions/checkout@v1
+      - uses: rlespinasse/github-slug-action@master
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1.0.1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1.0.1
+        with:
+          registries: ${{ env.DEV_REGISTRY }}
+      - name: Build, tag, and push image to Amazon ECR
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT
+      - name: Additional tag for develop branch
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout ${{ env.ECR_REGISTRY }}
