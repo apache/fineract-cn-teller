@@ -28,7 +28,7 @@ jobs:
           docker build --build-arg GRADLE_ARGS="-PARTIFACTORY_USER=jm-ci-bot -PARTIFACTORY_PASSWORD=${{ secrets.REPO_TOKEN }}" -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT
       - name: Additional tag for develop branch
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/master'
         run: |
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG
