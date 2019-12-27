@@ -25,7 +25,7 @@ jobs:
           registries: ${{ env.DEV_REGISTRY }}
       - name: Build, tag, and push image to Amazon ECR
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT .
+          docker build --build-arg GRADLE_ARGS="-PARTIFACTORY_USER=jm-ci-bot -PARTIFACTORY_PASSWORD=${{ secrets.REPO_TOKEN }}" -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_REF_SLUG-$GITHUB_SHA_SHORT
       - name: Additional tag for develop branch
         if: github.ref == 'refs/heads/develop'
