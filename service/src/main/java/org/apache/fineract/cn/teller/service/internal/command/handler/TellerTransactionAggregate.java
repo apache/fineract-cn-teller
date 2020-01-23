@@ -76,7 +76,13 @@ public class TellerTransactionAggregate {
   public TellerTransactionCosts process(final InitializeTellerTransactionCommand initializeTellerTransactionCommand) {
     final String tellerCode = initializeTellerTransactionCommand.tellerCode();
     final TellerTransaction tellerTransaction = initializeTellerTransactionCommand.tellerTransaction();
-
+    final Optional<TellerTransactionEntity> optionalTellerTransactionEntity = tellerTransactionRepository.findByBankTxnId(tellerTransaction.getBankTxnId());
+    if(optionalTellerTransactionEntity.isPresent()){
+      TellerTransactionEntity tellerTransactionEntity = optionalTellerTransactionEntity.get();
+      this.logger.info("Transaction with bank txn id {} already exists", tellerTransactionEntity.getBankTxnId());
+      tellerTransaction.setIdentifier(tellerTransactionEntity.getIdentifier());
+      return this.tellerTransactionProcessor.getCosts(tellerTransaction);
+    }
     final Optional<TellerEntity> optionalTeller = this.tellerRepository.findByIdentifier(tellerCode);
     if (optionalTeller.isPresent()) {
       tellerTransaction.setIdentifier(RandomStringUtils.randomAlphanumeric(32));
@@ -107,6 +113,7 @@ public class TellerTransactionAggregate {
     }
     return null;
   }
+
 
   @Transactional
   @CommandHandler

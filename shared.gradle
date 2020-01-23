@@ -24,7 +24,7 @@ ext.versions = [
         frameworkasync : '0.1.0-BUILD-SNAPSHOT',
         frameworkcassandra : '0.1.0-BUILD-SNAPSHOT',
         frameworkpostgresql : '0.1.0-BUILD-SNAPSHOT',
-        frameworkcommand   : '0.0.2',
+        frameworkcommand   : '0.1.0-BUILD-SNAPSHOT',
         frameworktest: '0.1.0-BUILD-SNAPSHOT',
         frameworkcrypto: '0.1.0-BUILD-SNAPSHOT',
         frameworkanubis: '0.1.0-BUILD-SNAPSHOT',
@@ -44,13 +44,6 @@ tasks.withType(JavaCompile) {
 repositories {
     jcenter()
     mavenLocal()
-    maven {
-        url = uri("https://maven.pkg.github.com/jupitermoney/fineract-cn-command")
-        credentials {
-            username = "${ARTIFACTORY_USER}"
-            password = "${ARTIFACTORY_PASSWORD}"
-        }
-    }
     maven { url 'https://mifos.jfrog.io/mifos/libs-snapshot/' }
 }
 

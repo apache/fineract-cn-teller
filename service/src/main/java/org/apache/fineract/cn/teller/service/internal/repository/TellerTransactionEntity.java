@@ -67,6 +67,26 @@ public class TellerTransactionEntity {
   private BigDecimal amount;
   @Column(name = "a_state", nullable = false, length = 256)
   private String state;
+  @Column(name = "bank_txn_id", nullable = false, length =256)
+  private String bankTxnId;
+  @Column(name = "meta_info", nullable = true)
+  private String metaInformation;
+
+  public String getBankTxnId() {
+    return bankTxnId;
+  }
+
+  public void setBankTxnId(String bankTxnId) {
+    this.bankTxnId = bankTxnId;
+  }
+
+  public String getMetaInformation() {
+    return metaInformation;
+  }
+
+  public void setMetaInformation(String metaInformation) {
+    this.metaInformation = metaInformation;
+  }
 
   public TellerTransactionEntity() {
     super();

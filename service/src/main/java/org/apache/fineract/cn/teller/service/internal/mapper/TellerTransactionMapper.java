@@ -41,6 +41,8 @@ public class TellerTransactionMapper {
     tellerTransaction.setAmount(tellerTransactionEntity.getAmount());
     tellerTransaction.setClerk(tellerTransactionEntity.getClerk());
     tellerTransaction.setState(tellerTransactionEntity.getState());
+    tellerTransaction.setBankTxnId(tellerTransactionEntity.getBankTxnId());
+    tellerTransaction.setMetaInformation(tellerTransactionEntity.getMetaInformation());
 
     return tellerTransaction;
   }
@@ -58,6 +60,8 @@ public class TellerTransactionMapper {
     tellerTransactionEntity.setAmount(tellerTransaction.getAmount());
     tellerTransactionEntity.setClerk(tellerTransaction.getClerk());
     tellerTransactionEntity.setState(tellerTransaction.getState());
+    tellerTransactionEntity.setBankTxnId(tellerTransaction.getBankTxnId());
+    tellerTransactionEntity.setMetaInformation(tellerTransaction.getMetaInformation());
 
     return tellerTransactionEntity;
   }

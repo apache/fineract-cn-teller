@@ -29,6 +29,8 @@ import java.util.Optional;
 public interface TellerTransactionRepository extends JpaRepository<TellerTransactionEntity, Long> {
   Optional<TellerTransactionEntity> findByIdentifier(final String tellerTransactionIdentifier);
 
+  Optional<TellerTransactionEntity> findByBankTxnId(final String bankTxnId);
+
   List<TellerTransactionEntity> findByTellerOrderByTransactionDateAsc(final TellerEntity teller);
 
   List<TellerTransactionEntity> findByTellerAndStateOrderByTransactionDateAsc(final TellerEntity teller,
