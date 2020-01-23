@@ -58,6 +58,25 @@ public class TellerTransaction {
   private State state;
   @Valid
   private Cheque cheque;
+  @NotNull
+  private String bankTxnId;
+  private String metaInformation;
+
+  public String getBankTxnId() {
+    return bankTxnId;
+  }
+
+  public void setBankTxnId(String bankTxnId) {
+    this.bankTxnId = bankTxnId;
+  }
+
+  public String getMetaInformation() {
+    return metaInformation;
+  }
+
+  public void setMetaInformation(String metaInformation) {
+    this.metaInformation = metaInformation;
+  }
 
   public TellerTransaction() {
     super();
