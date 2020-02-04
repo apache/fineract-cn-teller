@@ -31,6 +31,7 @@ import org.apache.fineract.cn.teller.service.internal.command.DrawerUnlockComman
 import org.apache.fineract.cn.teller.service.internal.command.InitializeTellerTransactionCommand;
 import org.apache.fineract.cn.teller.service.internal.command.PauseTellerCommand;
 import org.apache.fineract.cn.teller.service.internal.processor.TellerTransactionProcessor;
+import org.apache.fineract.cn.teller.service.internal.repository.TellerTransactionEntity;
 import org.apache.fineract.cn.teller.service.internal.service.TellerManagementService;
 import org.apache.fineract.cn.teller.service.internal.service.TellerOperationService;
 import org.apache.fineract.cn.teller.service.internal.service.helper.AccountingService;
@@ -42,6 +43,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import org.apache.fineract.cn.accounting.api.v1.domain.Account;
 import org.apache.fineract.cn.anubis.annotation.AcceptedTokenType;
@@ -176,6 +178,13 @@ public class TellerOperationRestController {
 
     if (!teller.getState().equals(Teller.State.ACTIVE.name())) {
       throw ServiceException.conflict("Teller {0} is not active.", tellerCode);
+    }
+
+    Optional<TellerTransaction> optionalTellerTransaction =  tellerOperationService.getTellerTransactionByBankTxnId(tellerTransaction.getBankTxnId());
+    if(optionalTellerTransaction.isPresent()){
+      TellerTransaction tellerTransactionObj = optionalTellerTransaction.get();
+      this.logger.info("Transaction with bank txn id {} already exists", tellerTransactionObj.getBankTxnId());
+      throw ServiceException.conflict("Transaction with bank txn id {} already exists", tellerTransactionObj.getBankTxnId());
     }
 
     this.verifyEmployee(teller);

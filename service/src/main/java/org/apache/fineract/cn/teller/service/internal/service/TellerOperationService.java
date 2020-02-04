@@ -75,6 +75,23 @@ public class TellerOperationService {
     });
   }
 
+  public Optional<TellerTransaction> getTellerTransactionByBankTxnId(final String bankTxnIdentifier) {
+
+    final Optional<TellerTransactionEntity> optionalTellerTransaction =
+            this.tellerTransactionRepository.findByBankTxnId(bankTxnIdentifier);
+
+    return optionalTellerTransaction.map(tellerTransactionEntity -> {
+        final TellerTransaction tellerTransaction = TellerTransactionMapper.map(tellerTransactionEntity);
+        if (tellerTransaction.getTransactionType().equals(ServiceConstants.TX_CHEQUE)) {
+            final Optional<ChequeEntity> optionalCheque =
+                    this.chequeRepository.findByTellerTransactionId(tellerTransactionEntity.getId());
+
+            optionalCheque.ifPresent(chequeEntity -> tellerTransaction.setCheque(ChequeMapper.map(chequeEntity)));
+        }
+        return tellerTransaction;
+    });
+  }
+
   public List<TellerTransaction> fetchTellerTransactions(final String tellerCode, final String state) {
     final Optional<TellerEntity> optionalTellerEntity = this.tellerRepository.findByIdentifier(tellerCode);
     if (optionalTellerEntity.isPresent()) {
