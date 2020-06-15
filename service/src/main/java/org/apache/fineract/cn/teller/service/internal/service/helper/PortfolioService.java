@@ -19,6 +19,8 @@
 package org.apache.fineract.cn.teller.service.internal.service.helper;
 
 import com.google.common.collect.Sets;
+import org.apache.fineract.cn.api.util.NotFoundException;
+import org.apache.fineract.cn.office.api.v1.client.BadRequestException;
 import org.apache.fineract.cn.teller.ServiceConstants;
 import org.apache.fineract.cn.teller.api.v1.domain.Charge;
 import java.math.BigDecimal;
@@ -31,8 +33,6 @@ import org.apache.fineract.cn.individuallending.api.v1.domain.product.AccountDes
 import org.apache.fineract.cn.individuallending.api.v1.domain.workflow.Action;
 import org.apache.fineract.cn.lang.DateConverter;
 import org.apache.fineract.cn.lang.ServiceException;
-import org.apache.fineract.cn.office.api.v1.client.BadRequestException;
-import org.apache.fineract.cn.office.api.v1.client.NotFoundException;
 import org.apache.fineract.cn.portfolio.api.v1.client.PortfolioManager;
 import org.apache.fineract.cn.portfolio.api.v1.domain.AccountAssignment;
 import org.apache.fineract.cn.portfolio.api.v1.domain.ChargeDefinition;
