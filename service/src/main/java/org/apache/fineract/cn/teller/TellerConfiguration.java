@@ -46,7 +46,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @SuppressWarnings("WeakerAccess")
 @Configuration
 @EnableAutoConfiguration
-@EnableDiscoveryClient
+// @EnableDiscoveryClient
 @EnableAsync
 @EnableTenantContext
 @EnableCassandra

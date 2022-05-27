@@ -17,6 +17,7 @@
 # under the License.
 #
 FROM openjdk:8-jdk-alpine AS builder
+
 RUN mkdir builddir
 COPY . builddir
 WORKDIR builddir

@@ -44,6 +44,7 @@ public class OrganizationService {
   public boolean officeExists(final String officeIdentifier) {
     try {
       this.organizationManager.findOfficeByIdentifier(officeIdentifier);
+      this.logger.info("Talked to office");
       return true;
     } catch (final NotFoundException nfex) {
       this.logger.warn("Office {} not found.", officeIdentifier);

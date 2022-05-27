@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "teller-v1", path = "/teller/v1", configuration = CustomFeignClientsConfiguration.class)
+@FeignClient(path = "/teller/v1", url = "http://${kubernetes.teller.service.name}:${kubernetes.teller.server.port}", configuration = CustomFeignClientsConfiguration.class)
 public interface TellerManager {
 
   @RequestMapping(
