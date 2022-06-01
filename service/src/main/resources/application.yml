@@ -17,19 +17,19 @@
 # under the License.
 #
 
-spring:
-  cloud:
-    discovery:
-      enabled: false
-    config:
-      enabled: false
+#spring:
+#  cloud:
+#    discovery:
+#      enabled: false
+#    config:
+#      enabled: false
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    homePageUrl: "http://${eureka.hostname}:2028/teller/v1/"
+# eureka:
+#   client:
+#     serviceUrl:
+#       defaultZone: http://localhost:8761/eureka/
+#   instance:
+#     homePageUrl: "http://${eureka.hostname}:2028/teller/v1/"
 
 server:
   port: 2028
@@ -69,3 +69,39 @@ async:
 
 flyway:
   enabled: false
+
+kubernetes:
+  teller:
+    service:
+      name: teller-service
+    server:
+      port: 2028
+  office:
+    service:
+      name: office-service
+    server:
+      port: 2023
+  accounting:
+    service:
+      name: accounting-service
+    server:
+      port: 2025
+  deposit:
+    service:
+      name: deposit-service
+    server:
+      port: 2027
+  cheque:
+    service:
+      name: cheques-service
+    server:
+      port: 2030
+  portfolio:
+    service:
+      name: portfolio-service
+    server:
+      port: 2026
+
+ribbon:
+  eureka:
+    enabled: false

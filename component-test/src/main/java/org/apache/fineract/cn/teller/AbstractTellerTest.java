@@ -63,7 +63,7 @@ public class AbstractTellerTest extends SuiteTestEnvironment {
   @Configuration
   @EnableEventRecording
   @EnableFeignClients(basePackages = {"org.apache.fineract.cn.teller.api.v1.client"})
-  @RibbonClient(name = APP_NAME)
+  // @RibbonClient(name = APP_NAME)
   @Import({TellerConfiguration.class})
   @ComponentScan("org.apache.fineract.cn.teller.listener")
   public static class TestConfiguration {
